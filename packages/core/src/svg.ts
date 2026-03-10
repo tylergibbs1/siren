@@ -11,7 +11,6 @@
 
 import { layoutGraph } from "./layout";
 import type { LayoutDirection, LayoutResult } from "./types";
-import { sanitizeText } from "./sanitize";
 
 // ── Theme ──────────────────────────────────────────────────────────
 
@@ -148,7 +147,11 @@ function wrapText(text: string, maxWidth: number, fontSize: number, fontFamily?:
 // ── XML helpers ────────────────────────────────────────────────────
 
 function esc(s: string): string {
-  return sanitizeText(s);
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function radiusPx(theme: SVGTheme): number {

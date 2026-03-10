@@ -26,10 +26,9 @@ describe("renderToSVG", () => {
       edges: [],
     });
 
-    // sanitizeText strips tags, so <script> and </script> are removed
+    // esc() XML-escapes angle brackets so raw <script> never appears
     expect(svg).not.toContain("<script>");
-    // The inner text "alert("xss")" should have quotes escaped
-    expect(svg).toContain("&quot;xss&quot;");
+    expect(svg).toContain("&lt;script&gt;");
   });
 
   it("escapes XSS in edge labels", async () => {
@@ -42,7 +41,9 @@ describe("renderToSVG", () => {
       edges: [{ from: "a", to: "b", label: '<img onerror="alert(1)">' }],
     });
 
-    expect(svg).not.toContain("onerror");
+    // esc() XML-escapes the label so raw HTML never executes
+    expect(svg).not.toContain("<img");
+    expect(svg).toContain("&lt;img");
   });
 
   it("renders sequence diagrams with custom layout", async () => {
