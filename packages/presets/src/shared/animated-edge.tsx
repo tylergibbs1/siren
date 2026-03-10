@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import { BaseEdge, getBezierPath, type EdgeProps } from "@xyflow/react";
 import { EDGE_STYLE } from "./edge-styles";
 
@@ -25,7 +25,9 @@ function AnimatedEdgeComponent({
   markerEnd,
   markerStart,
 }: EdgeProps) {
-  injectKeyframes();
+  useEffect(() => {
+    injectKeyframes();
+  }, []);
 
   const [edgePath] = getBezierPath({
     sourceX,
