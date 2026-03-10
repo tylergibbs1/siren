@@ -124,4 +124,30 @@ const presentation: SirenTheme = {
   fontMono: FONT_MONO,
 };
 
-export const themes = { dark, light, github, presentation } as const;
+// ─── Neutral (print-optimized) ───────────────────────────────────
+// High-contrast black-and-white, optimized for printing and monochrome output
+const neutral: SirenTheme = {
+  colors: {
+    background: "#ffffff",
+    surface: "#f5f5f5",
+    surfaceRaised: "#ffffff",
+    node: "#ffffff",
+    nodeBorder: "#333333",
+    borderStrong: "#000000",
+    edge: "#555555",
+    text: "#000000",
+    textMuted: "#333333",
+    textSubtle: "#555555",
+    primary: "#000000",
+    primaryMuted: "#e5e5e5",
+    success: "#333333",
+    warning: "#666666",
+    danger: "#333333",
+  },
+  radius: "4px",
+  fontFamily: "Georgia, 'Times New Roman', serif",
+  fontMono:
+    '"Courier New", Courier, monospace',
+};
+
+export const themes = { dark, light, github, presentation, neutral } as const;

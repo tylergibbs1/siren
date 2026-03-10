@@ -94,6 +94,21 @@ export { SankeyFlowEdge } from "./sankey/sankey-flow-edge";
 // Packet Diagram
 export { PacketDiagram } from "./packet/packet-diagram";
 
+// User Journey
+export { UserJourney } from "./userjourney/userjourney";
+
+// XY Chart
+export { XYChart } from "./xychart/xychart";
+
+// Radar Chart
+export { RadarChart } from "./radar/radar-chart";
+
+// Treemap
+export { TreemapChart } from "./treemap/treemap-chart";
+
+// Venn Diagram
+export { VennDiagram } from "./venn/venn-diagram";
+
 // Shared
 export { ListNode } from "./shared/list-node";
 export type { ListNodeData } from "./shared/list-node";

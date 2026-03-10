@@ -15,6 +15,7 @@ const VALID_CLASS_REL_TYPES = new Set(["inheritance", "composition", "aggregatio
 const VALID_ER_CARDINALITIES = new Set(["1:1", "1:N", "N:1", "M:N"]);
 const VALID_REQ_REL_TYPES = new Set(["traces", "derives", "satisfies", "verifies", "refines", "contains"]);
 const VALID_C4_ELEMENT_TYPES = new Set(["person", "system", "boundary"]);
+const VALID_XY_SERIES_TYPES = new Set(["line", "bar"]);
 
 function validateMindmapNode(node: Record<string, unknown>, errors: ValidationError[], path: string) {
   if (!node.id || typeof node.id !== "string") errors.push(err("MISSING_FIELD", `${path}: missing string 'id'`, `${path}.id`));
@@ -591,6 +592,123 @@ export function validate(input: unknown): ValidationResult {
             if (typeof field.bits !== "number")
               errors.push(err("MISSING_FIELD", `Field '${field.label}' must have a number 'bits'`, `rows[${i}].fields[${j}].bits`));
           }
+        }
+      }
+    }
+  } else if (obj.type === "userjourney") {
+    if (!Array.isArray(obj.sections))
+      errors.push(err("MISSING_FIELD", "'sections' must be an array", "sections"));
+
+    if (errors.length === 0) {
+      const sections = obj.sections as Array<Record<string, unknown>>;
+      for (let i = 0; i < sections.length; i++) {
+        const section = sections[i]!;
+        if (!section.label || typeof section.label !== "string")
+          errors.push(err("MISSING_FIELD", "Each section must have a string 'label'", `sections[${i}].label`));
+        if (!Array.isArray(section.tasks))
+          errors.push(err("MISSING_FIELD", `Section '${section.label}' must have a 'tasks' array`, `sections[${i}].tasks`));
+        else {
+          const tasks = section.tasks as Array<Record<string, unknown>>;
+          for (let j = 0; j < tasks.length; j++) {
+            const task = tasks[j]!;
+            if (!task.id || typeof task.id !== "string")
+              errors.push(err("MISSING_FIELD", "Each task must have a string 'id'", `sections[${i}].tasks[${j}].id`));
+            if (!task.label || typeof task.label !== "string")
+              errors.push(err("MISSING_FIELD", `Task '${task.id}' must have a string 'label'`, `sections[${i}].tasks[${j}].label`));
+            if (typeof task.score !== "number")
+              errors.push(err("MISSING_FIELD", `Task '${task.id}' must have a number 'score'`, `sections[${i}].tasks[${j}].score`));
+          }
+        }
+      }
+    }
+  } else if (obj.type === "xychart") {
+    if (!Array.isArray(obj.xAxis))
+      errors.push(err("MISSING_FIELD", "'xAxis' must be an array of strings", "xAxis"));
+    if (!Array.isArray(obj.series))
+      errors.push(err("MISSING_FIELD", "'series' must be an array", "series"));
+
+    if (errors.length === 0) {
+      const series = obj.series as Array<Record<string, unknown>>;
+      for (let i = 0; i < series.length; i++) {
+        const s = series[i]!;
+        if (!s.label || typeof s.label !== "string")
+          errors.push(err("MISSING_FIELD", "Each series must have a string 'label'", `series[${i}].label`));
+        if (!s.type || typeof s.type !== "string")
+          errors.push(err("MISSING_FIELD", "Each series must have a string 'type'", `series[${i}].type`));
+        if (s.type && typeof s.type === "string" && !VALID_XY_SERIES_TYPES.has(s.type as string))
+          errors.push(err("INVALID_ENUM", `Invalid series type: '${s.type}'. Must be 'line' or 'bar'`, `series[${i}].type`));
+        if (!Array.isArray(s.data))
+          errors.push(err("MISSING_FIELD", `Series '${s.label}' must have a 'data' array of numbers`, `series[${i}].data`));
+      }
+    }
+  } else if (obj.type === "radar") {
+    if (!Array.isArray(obj.axes))
+      errors.push(err("MISSING_FIELD", "'axes' must be an array of strings", "axes"));
+    if (!Array.isArray(obj.series))
+      errors.push(err("MISSING_FIELD", "'series' must be an array", "series"));
+
+    if (errors.length === 0) {
+      const axes = obj.axes as string[];
+      const series = obj.series as Array<Record<string, unknown>>;
+      for (let i = 0; i < series.length; i++) {
+        const s = series[i]!;
+        if (!s.label || typeof s.label !== "string")
+          errors.push(err("MISSING_FIELD", "Each series must have a string 'label'", `series[${i}].label`));
+        if (!Array.isArray(s.values))
+          errors.push(err("MISSING_FIELD", `Series '${s.label}' must have a 'values' array`, `series[${i}].values`));
+        else if ((s.values as number[]).length !== axes.length)
+          errors.push(err("INVALID_FIELD", `Series '${s.label}' values length must match axes count (${axes.length})`, `series[${i}].values`));
+      }
+    }
+  } else if (obj.type === "treemap") {
+    if (!obj.root || typeof obj.root !== "object")
+      errors.push(err("MISSING_FIELD", "'root' must be an object", "root"));
+
+    if (errors.length === 0) {
+      const root = obj.root as Record<string, unknown>;
+      if (!root.label || typeof root.label !== "string")
+        errors.push(err("MISSING_FIELD", "root must have a string 'label'", "root.label"));
+      if (!Array.isArray(root.children))
+        errors.push(err("MISSING_FIELD", "root must have a 'children' array", "root.children"));
+    }
+  } else if (obj.type === "venn") {
+    if (!Array.isArray(obj.sets))
+      errors.push(err("MISSING_FIELD", "'sets' must be an array", "sets"));
+
+    if (errors.length === 0) {
+      const sets = obj.sets as Array<Record<string, unknown>>;
+      const setIds = new Set<string>();
+
+      for (let i = 0; i < sets.length; i++) {
+        const s = sets[i]!;
+        if (!s.id || typeof s.id !== "string")
+          errors.push(err("MISSING_FIELD", "Each set must have a string 'id'", `sets[${i}].id`));
+        if (!s.label || typeof s.label !== "string")
+          errors.push(err("MISSING_FIELD", `Set '${s.id}' must have a string 'label'`, `sets[${i}].label`));
+        if (typeof s.value !== "number")
+          errors.push(err("MISSING_FIELD", `Set '${s.id}' must have a number 'value'`, `sets[${i}].value`));
+        if (s.id && typeof s.id === "string") {
+          if (setIds.has(s.id as string))
+            errors.push(err("DUPLICATE_ID", `Duplicate set id: '${s.id}'`, `sets[${i}].id`));
+          setIds.add(s.id as string);
+        }
+      }
+
+      if (Array.isArray(obj.intersections)) {
+        const intersections = obj.intersections as Array<Record<string, unknown>>;
+        for (let i = 0; i < intersections.length; i++) {
+          const inter = intersections[i]!;
+          if (!Array.isArray(inter.sets))
+            errors.push(err("MISSING_FIELD", "Each intersection must have a 'sets' array", `intersections[${i}].sets`));
+          else {
+            const interSets = inter.sets as string[];
+            for (let j = 0; j < interSets.length; j++) {
+              if (!setIds.has(interSets[j]!))
+                errors.push(err("UNKNOWN_REFERENCE", `Intersection references unknown set: '${interSets[j]}'`, `intersections[${i}].sets[${j}]`));
+            }
+          }
+          if (typeof inter.value !== "number")
+            errors.push(err("MISSING_FIELD", "Each intersection must have a number 'value'", `intersections[${i}].value`));
         }
       }
     }

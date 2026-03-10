@@ -9,8 +9,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles.css": "./dist/styles.css",
-    "./tweakcn.css": "./src/tweakcn.css"
+    "./styles.css": {
+      "style": "./dist/styles.css",
+      "default": "./dist/styles.css"
+    },
+    "./tweakcn.css": {
+      "style": "./src/tweakcn.css",
+      "default": "./src/tweakcn.css"
+    }
   },
   "scripts": {
     "build": "tsup",

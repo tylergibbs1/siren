@@ -35,6 +35,11 @@ import {
   Mindmap,
   PacketDiagram,
   PieChart,
+  RadarChart,
+  TreemapChart,
+  UserJourney,
+  VennDiagram,
+  XYChart,
   QuadrantChart,
   QuadrantItem,
   Relationship,
@@ -485,6 +490,56 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
             title={schema.title}
             wordSize={schema.wordSize}
             rows={schema.rows}
+          />
+        </div>
+      );
+
+    case "userjourney":
+      return (
+        <div style={FILL_STYLE}>
+          <UserJourney title={schema.title} sections={schema.sections} />
+        </div>
+      );
+
+    case "xychart":
+      return (
+        <div style={FILL_STYLE}>
+          <XYChart
+            title={schema.title}
+            xLabel={schema.xLabel}
+            yLabel={schema.yLabel}
+            xAxis={schema.xAxis}
+            series={schema.series}
+          />
+        </div>
+      );
+
+    case "radar":
+      return (
+        <div style={FILL_STYLE}>
+          <RadarChart
+            title={schema.title}
+            axes={schema.axes}
+            series={schema.series}
+            max={schema.max}
+          />
+        </div>
+      );
+
+    case "treemap":
+      return (
+        <div style={FILL_STYLE}>
+          <TreemapChart title={schema.title} root={schema.root} />
+        </div>
+      );
+
+    case "venn":
+      return (
+        <div style={FILL_STYLE}>
+          <VennDiagram
+            title={schema.title}
+            sets={schema.sets}
+            intersections={schema.intersections}
           />
         </div>
       );

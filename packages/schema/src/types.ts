@@ -333,6 +333,78 @@ export interface PacketSchema {
   }>;
 }
 
+export interface UserJourneySchema {
+  type: "userjourney";
+  title?: string;
+  sections: Array<{
+    label: string;
+    tasks: Array<{
+      id: string;
+      label: string;
+      score: number;
+      actors?: string[];
+    }>;
+  }>;
+}
+
+export interface XYChartSchema {
+  type: "xychart";
+  title?: string;
+  xLabel?: string;
+  yLabel?: string;
+  xAxis: string[];
+  series: Array<{
+    label: string;
+    type: "line" | "bar";
+    data: number[];
+    color?: string;
+  }>;
+}
+
+export interface RadarSchema {
+  type: "radar";
+  title?: string;
+  axes: string[];
+  series: Array<{
+    label: string;
+    values: number[];
+    color?: string;
+  }>;
+  max?: number;
+}
+
+export interface TreemapSchema {
+  type: "treemap";
+  title?: string;
+  root: {
+    label: string;
+    children: TreemapNode[];
+  };
+}
+
+export interface TreemapNode {
+  label: string;
+  value?: number;
+  color?: string;
+  children?: TreemapNode[];
+}
+
+export interface VennSchema {
+  type: "venn";
+  title?: string;
+  sets: Array<{
+    id: string;
+    label: string;
+    value: number;
+    color?: string;
+  }>;
+  intersections?: Array<{
+    sets: string[];
+    label?: string;
+    value: number;
+  }>;
+}
+
 export type SirenSchema =
   | FlowchartSchema
   | SequenceSchema
@@ -351,7 +423,12 @@ export type SirenSchema =
   | GitGraphSchema
   | GanttSchema
   | SankeySchema
-  | PacketSchema;
+  | PacketSchema
+  | UserJourneySchema
+  | XYChartSchema
+  | RadarSchema
+  | TreemapSchema
+  | VennSchema;
 
 /** Current schema version. Bump on breaking changes to the document format. */
 export const SCHEMA_VERSION = "0.1.0";

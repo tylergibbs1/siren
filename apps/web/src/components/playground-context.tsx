@@ -20,6 +20,7 @@ const THEME_OPTIONS: { id: ThemeId; label: string }[] = [
   { id: "light", label: "Light" },
   { id: "github", label: "GitHub" },
   { id: "presentation", label: "Presentation" },
+  { id: "neutral", label: "Neutral (Print)" },
   { id: "custom", label: "Custom (tweakcn)" },
 ];
 

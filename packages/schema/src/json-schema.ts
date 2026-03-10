@@ -688,6 +688,160 @@ export const packetJsonSchema = {
   },
 } as const;
 
+export const userjourneyJsonSchema = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  type: "object",
+  required: ["type", "sections"],
+  properties: {
+    type: { const: "userjourney" },
+    title: { type: "string" },
+    sections: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["label", "tasks"],
+        properties: {
+          label: { type: "string" },
+          tasks: {
+            type: "array",
+            items: {
+              type: "object",
+              required: ["id", "label", "score"],
+              properties: {
+                id: { type: "string" },
+                label: { type: "string" },
+                score: { type: "number", minimum: 1, maximum: 5 },
+                actors: { type: "array", items: { type: "string" } },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+} as const;
+
+export const xychartJsonSchema = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  type: "object",
+  required: ["type", "xAxis", "series"],
+  properties: {
+    type: { const: "xychart" },
+    title: { type: "string" },
+    xLabel: { type: "string" },
+    yLabel: { type: "string" },
+    xAxis: { type: "array", items: { type: "string" } },
+    series: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["label", "type", "data"],
+        properties: {
+          label: { type: "string" },
+          type: { enum: ["line", "bar"] },
+          data: { type: "array", items: { type: "number" } },
+          color: { type: "string" },
+        },
+      },
+    },
+  },
+} as const;
+
+export const radarJsonSchema = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  type: "object",
+  required: ["type", "axes", "series"],
+  properties: {
+    type: { const: "radar" },
+    title: { type: "string" },
+    axes: { type: "array", items: { type: "string" } },
+    series: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["label", "values"],
+        properties: {
+          label: { type: "string" },
+          values: { type: "array", items: { type: "number" } },
+          color: { type: "string" },
+        },
+      },
+    },
+    max: { type: "number" },
+  },
+} as const;
+
+export const treemapJsonSchema = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  type: "object",
+  required: ["type", "root"],
+  properties: {
+    type: { const: "treemap" },
+    title: { type: "string" },
+    root: {
+      type: "object",
+      required: ["label", "children"],
+      properties: {
+        label: { type: "string" },
+        children: {
+          type: "array",
+          items: { $ref: "#/$defs/treemapNode" },
+        },
+      },
+    },
+  },
+  $defs: {
+    treemapNode: {
+      type: "object",
+      required: ["label"],
+      properties: {
+        label: { type: "string" },
+        value: { type: "number" },
+        color: { type: "string" },
+        children: {
+          type: "array",
+          items: { $ref: "#/$defs/treemapNode" },
+        },
+      },
+    },
+  },
+} as const;
+
+export const vennJsonSchema = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  type: "object",
+  required: ["type", "sets"],
+  properties: {
+    type: { const: "venn" },
+    title: { type: "string" },
+    sets: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["id", "label", "value"],
+        properties: {
+          id: { type: "string" },
+          label: { type: "string" },
+          value: { type: "number" },
+          color: { type: "string" },
+        },
+      },
+    },
+    intersections: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["sets", "value"],
+        properties: {
+          sets: { type: "array", items: { type: "string" } },
+          label: { type: "string" },
+          value: { type: "number" },
+        },
+      },
+    },
+  },
+} as const;
+
 export const sirenJsonSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
   $id: "https://siren.dev/schema/v0.1.0",
@@ -712,5 +866,10 @@ export const sirenJsonSchema = {
   ganttJsonSchema,
   sankeyJsonSchema,
   packetJsonSchema,
+  userjourneyJsonSchema,
+  xychartJsonSchema,
+  radarJsonSchema,
+  treemapJsonSchema,
+  vennJsonSchema,
   ],
 } as const;
