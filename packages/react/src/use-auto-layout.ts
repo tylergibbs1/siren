@@ -17,6 +17,12 @@ export interface AutoLayoutOptions {
   layoutOptions?: Record<string, string | number>;
 }
 
+/** Stable JSON key for object deps so they don't re-trigger on every render */
+function stableKey(obj: unknown): string {
+  if (obj == null) return "";
+  return JSON.stringify(obj, Object.keys(obj as Record<string, unknown>).sort());
+}
+
 /**
  * Runs ELK layout once nodes are measured by React Flow.
  *
@@ -33,6 +39,14 @@ export function useAutoLayout(
   const direction = opts.direction ?? "TB";
   const spacing = opts.spacing;
   const layoutOptions = opts.layoutOptions;
+
+  // Stabilize object references so they don't re-trigger the effect
+  const spacingKey = stableKey(spacing);
+  const layoutOptsKey = stableKey(layoutOptions);
+  const spacingRef = useRef(spacing);
+  const layoutOptsRef = useRef(layoutOptions);
+  if (stableKey(spacingRef.current) !== spacingKey) spacingRef.current = spacing;
+  if (stableKey(layoutOptsRef.current) !== layoutOptsKey) layoutOptsRef.current = layoutOptions;
 
   const { setNodes, getNodes, getEdges, fitView } = useReactFlow();
   const layoutRunRef = useRef(0);
@@ -88,8 +102,8 @@ export function useAutoLayout(
       nodes: sirenNodes,
       edges: sirenEdges,
       direction,
-      spacing,
-      layoutOptions,
+      spacing: spacingRef.current,
+      layoutOptions: layoutOptsRef.current,
     })
       .then((result) => {
         if (run !== layoutRunRef.current) return;
@@ -114,8 +128,8 @@ export function useAutoLayout(
     measurementKey,
     edgeKey,
     direction,
-    spacing,
-    layoutOptions,
+    spacingKey,
+    layoutOptsKey,
     getNodes,
     getEdges,
     setNodes,
