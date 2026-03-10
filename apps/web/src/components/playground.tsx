@@ -378,6 +378,14 @@ export function Playground() {
       const dataUrl = await toSvg(container, {
         backgroundColor: activeTheme.colors.background,
         style: { margin: "0", padding: "0" },
+        skipAutoScale: true,
+        filter: (node: any) => {
+          // Skip cross-origin <link> stylesheets that trigger SecurityError
+          if (node.tagName === "LINK" && node.rel === "stylesheet") {
+            try { return !node.sheet || !!node.sheet.cssRules; } catch { return false; }
+          }
+          return true;
+        },
       });
       // Convert data URL to raw SVG string
       const svgString = decodeURIComponent(dataUrl.split(",")[1] ?? "");
@@ -398,6 +406,13 @@ export function Playground() {
         pixelRatio: 2,
         backgroundColor: activeTheme.colors.background,
         style: { margin: "0", padding: "0" },
+        skipAutoScale: true,
+        filter: (node: any) => {
+          if (node.tagName === "LINK" && node.rel === "stylesheet") {
+            try { return !node.sheet || !!node.sheet.cssRules; } catch { return false; }
+          }
+          return true;
+        },
       });
       const link = document.createElement("a");
       link.download = "siren-diagram.png";
