@@ -43,7 +43,7 @@ interface ClassDiagramProps {
   className?: string;
   style?: React.CSSProperties;
   edgeType?: string;
-  interactive?: boolean;
+  mode?: "static" | "interactive";
   ariaLabel?: string;
 }
 
@@ -171,7 +171,7 @@ function ClassDiagramInner({
   className,
   style,
   edgeType: diagramEdgeType,
-  interactive,
+  mode,
   ariaLabel,
 }: Omit<ClassDiagramProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
@@ -236,9 +236,9 @@ function ClassDiagramInner({
         edgeTypes={edgeTypes}
         fitView
         proOptions={PRO_OPTIONS}
-        nodesDraggable={interactive ?? false}
+        nodesDraggable={mode === "interactive"}
         nodesConnectable={false}
-        elementsSelectable={interactive ?? false}
+        elementsSelectable={mode === "interactive"}
         minZoom={0.3}
         maxZoom={2}
         role="img"

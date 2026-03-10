@@ -51,7 +51,7 @@ interface FlowchartProps {
   className?: string;
   style?: React.CSSProperties;
   edgeType?: string;
-  interactive?: boolean;
+  mode?: "static" | "interactive";
   ariaLabel?: string;
 }
 
@@ -161,7 +161,7 @@ function FlowchartInner({
   className,
   style,
   edgeType: diagramEdgeType,
-  interactive,
+  mode,
   ariaLabel,
 }: Omit<FlowchartProps, "theme">) {
   // Parse children once for initial state
@@ -208,15 +208,15 @@ function FlowchartInner({
         edgeTypes={edgeTypes}
         fitView
         proOptions={PRO_OPTIONS}
-        nodesDraggable={interactive ?? false}
+        nodesDraggable={mode === "interactive"}
         nodesConnectable={false}
-        elementsSelectable={interactive ?? false}
+        elementsSelectable={mode === "interactive"}
         minZoom={0.3}
         maxZoom={2}
         role="img"
         aria-roledescription="flowchart"
         aria-label={ariaLabel ?? "Flowchart"}
-        {...(interactive ? { onNodeDrag, onNodeDragStop } : {})}
+        {...(mode === "interactive" ? { onNodeDrag, onNodeDragStop } : {})}
       >
         <LayoutRunner direction={direction} />
         <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="var(--siren-node-border, hsl(0 0% 18%))" />
