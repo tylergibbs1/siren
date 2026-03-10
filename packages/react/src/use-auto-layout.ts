@@ -5,13 +5,32 @@ import { useReactFlow, useStore } from "@xyflow/react";
 import { layoutGraph } from "@siren/core";
 import type { LayoutDirection } from "@siren/core";
 
+export interface AutoLayoutOptions {
+  direction?: LayoutDirection;
+  spacing?: {
+    node?: number;
+    layer?: number;
+    edge?: number;
+    edgeNode?: number;
+  };
+}
+
 /**
  * Runs ELK layout once nodes are measured by React Flow.
  *
  * Reads measured dimensions from React Flow's internal nodeLookup,
  * which is populated via onNodesChange in controlled mode.
  */
-export function useAutoLayout(direction: LayoutDirection = "TB") {
+export function useAutoLayout(
+  directionOrOpts: LayoutDirection | AutoLayoutOptions = "TB",
+) {
+  const opts =
+    typeof directionOrOpts === "string"
+      ? { direction: directionOrOpts }
+      : directionOrOpts;
+  const direction = opts.direction ?? "TB";
+  const spacing = opts.spacing;
+
   const { setNodes, getNodes, getEdges, fitView } = useReactFlow();
   const layoutRunRef = useRef(0);
   const lastKeyRef = useRef("");
@@ -33,7 +52,7 @@ export function useAutoLayout(direction: LayoutDirection = "TB") {
     s.edges
       .filter((e) => !e.data?.layoutIgnore)
       .map((e) => `${e.source}-${e.target}`)
-      .join(",")
+      .join(","),
   );
 
   useEffect(() => {
@@ -51,7 +70,9 @@ export function useAutoLayout(direction: LayoutDirection = "TB") {
       id: node.id,
       width: node.measured?.width ?? node.width ?? 100,
       height: node.measured?.height ?? node.height ?? 40,
-      layoutOptions: node.data?.layoutOptions as Record<string, string | number> | undefined,
+      layoutOptions: node.data?.layoutOptions as
+        | Record<string, string | number>
+        | undefined,
     }));
 
     const sirenEdges = currentEdges.map((edge) => ({
@@ -60,11 +81,16 @@ export function useAutoLayout(direction: LayoutDirection = "TB") {
       target: edge.target,
     }));
 
-    layoutGraph({ nodes: sirenNodes, edges: sirenEdges, direction })
+    layoutGraph({
+      nodes: sirenNodes,
+      edges: sirenEdges,
+      direction,
+      spacing,
+    })
       .then((result) => {
         if (run !== layoutRunRef.current) return;
         const resultById = new Map(
-          result.nodes.map((node) => [node.id, { x: node.x, y: node.y }])
+          result.nodes.map((node) => [node.id, { x: node.x, y: node.y }]),
         );
 
         setNodes((prev) =>
@@ -72,7 +98,7 @@ export function useAutoLayout(direction: LayoutDirection = "TB") {
             const laid = resultById.get(node.id);
             if (!laid) return node;
             return { ...node, position: { x: laid.x, y: laid.y } };
-          })
+          }),
         );
 
         fitView({ padding: 0.2, duration: 200 });
@@ -80,5 +106,14 @@ export function useAutoLayout(direction: LayoutDirection = "TB") {
       .catch((err) => {
         console.error("[siren] Layout failed:", err);
       });
-  }, [measurementKey, edgeKey, direction, getNodes, getEdges, setNodes, fitView]);
+  }, [
+    measurementKey,
+    edgeKey,
+    direction,
+    spacing,
+    getNodes,
+    getEdges,
+    setNodes,
+    fitView,
+  ]);
 }

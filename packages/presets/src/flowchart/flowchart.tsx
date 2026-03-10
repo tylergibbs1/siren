@@ -24,7 +24,7 @@ import type { LayoutDirection } from "@siren/core";
 import { Step } from "./step";
 import { Decision } from "./decision";
 import { FlowEdge } from "./edge";
-import { useAutoLayout, useCollisionDetection } from "@siren/react";
+import { useAutoLayout, useCollisionDetection, ClientOnly } from "@siren/react";
 import {
   EDGE_STYLE,
   EDGE_DASHED_STYLE,
@@ -217,13 +217,6 @@ function FlowchartInner({
       </ReactFlow>
     </div>
   );
-}
-
-function ClientOnly({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = React.useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-  return <>{children}</>;
 }
 
 export function Flowchart({ theme, ...props }: FlowchartProps) {

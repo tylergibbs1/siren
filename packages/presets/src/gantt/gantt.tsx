@@ -119,9 +119,9 @@ function formatDate(d: Date): string {
 // Layout constants
 const ROW_HEIGHT = 36;
 const ROW_GAP = 4;
-const LABEL_WIDTH = 160;
+const LABEL_WIDTH = 200;
 const HEADER_HEIGHT = 48;
-const DAY_WIDTH = 28;
+const DAY_WIDTH = 20;
 const PADDING = 16;
 
 function GanttInner({
@@ -307,7 +307,7 @@ function GanttInner({
                 width={chartWidth}
                 height={ROW_HEIGHT}
                 fill={i % 2 === 0 ? "transparent" : "var(--siren-node-border, #e2e8f0)"}
-                opacity="0.15"
+                opacity="0.08"
               />
 
               {/* Section / task label */}

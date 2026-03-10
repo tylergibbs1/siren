@@ -6,8 +6,6 @@ import {
   ReactFlowProvider,
   useNodesState,
   useEdgesState,
-  useReactFlow,
-  useStore,
   Background,
   BackgroundVariant,
   Controls,
@@ -17,7 +15,7 @@ import {
 import { SirenProvider } from "@siren/themes";
 import type { SirenTheme } from "@siren/themes";
 import type { LayoutDirection } from "@siren/core";
-import { layoutGraph } from "@siren/core";
+import { ClientOnly, useGroupedLayout } from "@siren/react";
 import { C4Person } from "./c4-person";
 import { C4System } from "./c4-system";
 import { C4Boundary } from "./c4-boundary";
@@ -160,100 +158,6 @@ function collectChildren(
   });
 }
 
-/**
- * Layout hook using ELK compound layout.
- * Boundaries are ELK parent nodes so ELK handles spacing and prevents overlap.
- */
-function useC4Layout(
-  direction: LayoutDirection,
-  groupMembership: Map<string, string>
-) {
-  const { setNodes, getNodes, getEdges, fitView } = useReactFlow();
-  const lastKeyRef = useRef("");
-  const layoutRunRef = useRef(0);
-
-  const groupIds = useMemo(
-    () => new Set(groupMembership.values()),
-    [groupMembership]
-  );
-
-  const measurementKey = useStore((s) => {
-    if (s.nodeLookup.size === 0) return "";
-    const parts: string[] = [];
-    let allMeasured = true;
-    for (const [id, node] of s.nodeLookup) {
-      if (groupIds.has(id)) continue;
-      const w = node.measured?.width;
-      const h = node.measured?.height;
-      if (!w || !h) { allMeasured = false; break; }
-      parts.push(`${id}:${w}x${h}`);
-    }
-    return allMeasured ? parts.join(",") : "";
-  });
-
-  const edgeKey = useStore((s) =>
-    s.edges.map((e) => `${e.source}-${e.target}`).join(",")
-  );
-
-  useEffect(() => {
-    if (!measurementKey) return;
-
-    const key = `${measurementKey}|${edgeKey}|${direction}`;
-    if (key === lastKeyRef.current) return;
-    lastKeyRef.current = key;
-
-    const run = ++layoutRunRef.current;
-    const currentNodes = getNodes();
-    const currentEdges = getEdges();
-
-    const sirenNodes = currentNodes.map((node) => ({
-      id: node.id,
-      width: node.measured?.width ?? (node.style?.width as number) ?? node.width ?? 100,
-      height: node.measured?.height ?? (node.style?.height as number) ?? node.height ?? 40,
-      parentId: groupMembership.get(node.id),
-    }));
-
-    const sirenEdges = currentEdges.map((edge) => ({
-      id: edge.id,
-      source: edge.source,
-      target: edge.target,
-    }));
-
-    layoutGraph({ nodes: sirenNodes, edges: sirenEdges, direction })
-      .then((result) => {
-        if (run !== layoutRunRef.current) return;
-
-        const posById = new Map(result.nodes.map((n) => [n.id, n]));
-
-        setNodes((prev) =>
-          prev.map((node) => {
-            const laid = posById.get(node.id);
-            if (!laid) return node;
-
-            if (groupIds.has(node.id)) {
-              return {
-                ...node,
-                position: { x: laid.x, y: laid.y },
-                style: {
-                  ...node.style,
-                  width: laid.width,
-                  height: laid.height,
-                },
-              };
-            }
-
-            return { ...node, position: { x: laid.x, y: laid.y } };
-          })
-        );
-
-        fitView({ padding: 0.2, duration: 200 });
-      })
-      .catch((err) => {
-        console.error("[siren] Layout failed:", err);
-      });
-  }, [measurementKey, edgeKey, direction, getNodes, getEdges, setNodes, fitView, groupIds, groupMembership]);
-}
-
 function C4LayoutRunner({
   direction,
   groupMembership,
@@ -261,7 +165,7 @@ function C4LayoutRunner({
   direction: LayoutDirection;
   groupMembership: Map<string, string>;
 }) {
-  useC4Layout(direction, groupMembership);
+  useGroupedLayout(direction, groupMembership);
   return null;
 }
 
@@ -324,13 +228,6 @@ function C4DiagramInner({
       </ReactFlow>
     </div>
   );
-}
-
-function ClientOnly({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = React.useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-  return <>{children}</>;
 }
 
 export function C4Diagram({ theme, ...props }: C4DiagramProps) {

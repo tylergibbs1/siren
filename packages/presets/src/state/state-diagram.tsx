@@ -15,7 +15,7 @@ import {
 import { SirenProvider } from "@siren/themes";
 import type { SirenTheme } from "@siren/themes";
 import type { LayoutDirection } from "@siren/core";
-import { useAutoLayout } from "@siren/react";
+import { useAutoLayout, ClientOnly } from "@siren/react";
 import { StateNode } from "./state-node";
 import { StateInitial } from "./state-initial";
 import { StateFinal } from "./state-final";
@@ -32,7 +32,7 @@ import { AnimatedEdge } from "../shared/animated-edge";
 import { SelfLoopEdge } from "../shared/self-loop-edge";
 
 function LayoutRunner({ direction }: { direction: LayoutDirection }) {
-  useAutoLayout(direction);
+  useAutoLayout({ direction, spacing: { node: 60, layer: 80, edgeNode: 48 } });
   return null;
 }
 
@@ -193,13 +193,6 @@ function StateDiagramInner({
       </ReactFlow>
     </div>
   );
-}
-
-function ClientOnly({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = React.useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-  return <>{children}</>;
 }
 
 export function StateDiagram({ theme, ...props }: StateDiagramProps) {

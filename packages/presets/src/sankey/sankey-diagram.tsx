@@ -16,11 +16,13 @@ import { SirenProvider } from "@siren/themes";
 import type { SirenTheme } from "@siren/themes";
 import { SankeyNode } from "./sankey-node";
 import { SankeyFlowEdge } from "./sankey-flow-edge";
+import { TextLabelNode } from "../shared/text-label-node";
 import { PRO_OPTIONS } from "../shared/edge-styles";
 
 // Hoisted module-level
 const nodeTypes = {
   sankey: SankeyNode,
+  "text-label": TextLabelNode,
 };
 
 const edgeTypes = {
@@ -101,8 +103,9 @@ function SankeyDiagramInner({
   const prevKeyRef = useRef("");
 
   const { nodes, edges } = useMemo(() => {
-    const COLUMN_SPACING = 200;
+    const COLUMN_SPACING = 300;
     const NODE_WIDTH = 24;
+    const LABEL_WIDTH = 120;
     const PIXELS_PER_UNIT = 4;
     const NODE_GAP = 20;
 
@@ -122,6 +125,7 @@ function SankeyDiagramInner({
     // Topological layering
     const nodeIds = nodeDefs.map((n) => n.id);
     const layers = topoLayers(nodeIds, flows);
+    const numLayers = layers.length;
 
     // Position nodes
     const nodePositions: Record<
@@ -142,17 +146,42 @@ function SankeyDiagramInner({
         const height = Math.max(30, total * PIXELS_PER_UNIT);
 
         nodePositions[nodeId] = {
-          x: col * COLUMN_SPACING,
+          x: col * COLUMN_SPACING + LABEL_WIDTH,
           y: currentY,
           height,
         };
 
+        const x = col * COLUMN_SPACING + LABEL_WIDTH;
         nodes.push({
           id: nodeId,
           type: "sankey",
-          position: { x: col * COLUMN_SPACING, y: currentY },
-          data: { label: def.label, totalValue: total },
+          position: { x, y: currentY },
+          data: { label: "", totalValue: total },
           style: { width: `${NODE_WIDTH}px`, height: `${height}px` },
+        });
+
+        // Label node positioned beside the sankey bar
+        const isFirstCol = col === 0;
+        const isLastCol = col === numLayers - 1;
+        const labelX = isLastCol
+          ? x + NODE_WIDTH + 8
+          : isFirstCol
+            ? x - LABEL_WIDTH - 8
+            : x + NODE_WIDTH + 8;
+
+        nodes.push({
+          id: `__label-${nodeId}`,
+          type: "text-label",
+          position: { x: labelX, y: currentY + height / 2 - 10 },
+          data: {
+            label: def.label,
+            fontSize: "11px",
+            fontWeight: 500,
+            textAlign: isFirstCol ? "right" : "left",
+          },
+          style: { width: `${LABEL_WIDTH}px` },
+          selectable: false,
+          draggable: false,
         });
 
         currentY += height + NODE_GAP;
@@ -192,6 +221,7 @@ function SankeyDiagramInner({
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
+        fitViewOptions={{ padding: 0.1 }}
         proOptions={PRO_OPTIONS}
         nodesDraggable={false}
         nodesConnectable={false}

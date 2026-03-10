@@ -16,7 +16,7 @@ import {
 import { SirenProvider } from "@siren/themes";
 import type { SirenTheme } from "@siren/themes";
 import type { LayoutDirection } from "@siren/core";
-import { useAutoLayout } from "@siren/react";
+import { useAutoLayout, ClientOnly } from "@siren/react";
 import { EREntity } from "./er-entity";
 import { ERRelationship } from "./er-relationship";
 import type { ERCardinality } from "./er-relationship";
@@ -179,13 +179,6 @@ function ERDiagramInner({
       </ReactFlow>
     </div>
   );
-}
-
-function ClientOnly({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = React.useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-  return <>{children}</>;
 }
 
 export function ERDiagram({ theme, ...props }: ERDiagramProps) {

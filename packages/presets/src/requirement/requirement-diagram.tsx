@@ -15,7 +15,7 @@ import {
 import { SirenProvider } from "@siren/themes";
 import type { SirenTheme } from "@siren/themes";
 import type { LayoutDirection } from "@siren/core";
-import { useAutoLayout } from "@siren/react";
+import { useAutoLayout, ClientOnly } from "@siren/react";
 import { RequirementNode } from "./requirement-node";
 import { Relationship } from "./relationship";
 import {
@@ -165,13 +165,6 @@ function RequirementDiagramInner({
       </ReactFlow>
     </div>
   );
-}
-
-function ClientOnly({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = React.useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-  return <>{children}</>;
 }
 
 export function RequirementDiagram({
