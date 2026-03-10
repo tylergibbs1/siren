@@ -1,0 +1,91 @@
+---
+title: Pie Chart
+description: Complete syntax reference for Siren pie chart diagrams.
+---
+
+Pie charts show proportional data as slices of a circle. Use them for budget breakdowns, survey results, or any distribution data.
+
+## Minimal Example
+
+```json
+{
+  "type": "pie",
+  "segments": [
+    { "label": "Frontend", "value": 40 },
+    { "label": "Backend", "value": 35 },
+    { "label": "DevOps", "value": 25 }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "pie",
+  "title": "Monthly Cloud Spend",
+  "segments": [
+    { "label": "Compute", "value": 4200, "color": "#3b82f6" },
+    { "label": "Storage", "value": 1800, "color": "#10b981" },
+    { "label": "Database", "value": 2400, "color": "#f59e0b" },
+    { "label": "Networking", "value": 900, "color": "#8b5cf6" },
+    { "label": "Other", "value": 600, "color": "#6b7280" }
+  ]
+}
+```
+
+## Top-Level Fields
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `type` | Yes | Must be `"pie"` |
+| `title` | No | Chart title displayed above the pie |
+| `segments` | Yes | Array of segment objects |
+
+## Segments
+
+Each segment is a slice of the pie. Values are treated as proportions — they don't need to sum to 100.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `label` | Yes | Segment label |
+| `value` | Yes | Numeric value (determines slice size relative to total) |
+| `color` | No | Custom hex color (e.g., `"#3b82f6"`) |
+
+```json
+{ "label": "Compute", "value": 4200, "color": "#3b82f6" }
+```
+
+## More Examples
+
+### Survey Results
+
+```json
+{
+  "type": "pie",
+  "title": "Preferred Programming Language",
+  "segments": [
+    { "label": "TypeScript", "value": 38 },
+    { "label": "Python", "value": 27 },
+    { "label": "Go", "value": 15 },
+    { "label": "Rust", "value": 12 },
+    { "label": "Other", "value": 8 }
+  ]
+}
+```
+
+### Time Allocation
+
+```json
+{
+  "type": "pie",
+  "title": "Engineering Time Breakdown",
+  "segments": [
+    { "label": "Feature Development", "value": 40, "color": "#3b82f6" },
+    { "label": "Bug Fixes", "value": 20, "color": "#ef4444" },
+    { "label": "Code Review", "value": 15, "color": "#10b981" },
+    { "label": "Meetings", "value": 15, "color": "#f59e0b" },
+    { "label": "Documentation", "value": 10, "color": "#8b5cf6" }
+  ]
+}
+```

@@ -1,0 +1,185 @@
+---
+title: Mindmap
+description: Complete syntax reference for Siren mindmap diagrams.
+---
+
+Mindmaps show hierarchical ideas branching out from a central topic. Use them for brainstorming, knowledge organization, or feature breakdowns.
+
+## Minimal Example
+
+```json
+{
+  "type": "mindmap",
+  "root": {
+    "id": "root",
+    "label": "Project",
+    "children": [
+      { "id": "fe", "label": "Frontend" },
+      { "id": "be", "label": "Backend" },
+      { "id": "infra", "label": "Infrastructure" }
+    ]
+  }
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "mindmap",
+  "root": {
+    "id": "startup",
+    "label": "SaaS Startup",
+    "children": [
+      {
+        "id": "product",
+        "label": "Product",
+        "children": [
+          { "id": "editor", "label": "Rich Text Editor" },
+          { "id": "collab", "label": "Real-time Collaboration" },
+          { "id": "export", "label": "PDF / PNG Export" }
+        ]
+      },
+      {
+        "id": "eng",
+        "label": "Engineering",
+        "children": [
+          { "id": "frontend", "label": "React + TypeScript" },
+          { "id": "backend", "label": "Node.js API" },
+          { "id": "db", "label": "PostgreSQL" }
+        ]
+      },
+      {
+        "id": "growth",
+        "label": "Growth",
+        "children": [
+          { "id": "seo", "label": "SEO" },
+          { "id": "content", "label": "Blog & Tutorials" },
+          { "id": "community", "label": "Discord Community" }
+        ]
+      },
+      {
+        "id": "ops",
+        "label": "Operations",
+        "children": [
+          { "id": "ci", "label": "CI/CD" },
+          { "id": "monitor", "label": "Monitoring" },
+          { "id": "oncall", "label": "On-call Rotation" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Root
+
+The `root` object is the central node of the mindmap.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier |
+| `label` | Yes | Text displayed in the center node |
+| `children` | Yes | Array of child node objects |
+
+## Nodes
+
+Each node in the tree follows the same structure.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier |
+| `label` | Yes | Display text |
+| `children` | No | Array of child nodes (nest as deep as needed) |
+
+```json
+{
+  "id": "auth",
+  "label": "Authentication",
+  "children": [
+    { "id": "oauth", "label": "OAuth 2.0" },
+    { "id": "mfa", "label": "MFA" }
+  ]
+}
+```
+
+## More Examples
+
+### Technical Architecture Decision
+
+```json
+{
+  "type": "mindmap",
+  "root": {
+    "id": "decision",
+    "label": "Database Choice",
+    "children": [
+      {
+        "id": "sql",
+        "label": "SQL",
+        "children": [
+          { "id": "pg", "label": "PostgreSQL" },
+          { "id": "mysql", "label": "MySQL" }
+        ]
+      },
+      {
+        "id": "nosql",
+        "label": "NoSQL",
+        "children": [
+          { "id": "mongo", "label": "MongoDB" },
+          { "id": "dynamo", "label": "DynamoDB" }
+        ]
+      },
+      {
+        "id": "criteria",
+        "label": "Criteria",
+        "children": [
+          { "id": "perf", "label": "Query Performance" },
+          { "id": "scale", "label": "Scalability" },
+          { "id": "cost", "label": "Cost" },
+          { "id": "dx", "label": "Developer Experience" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Sprint Retrospective
+
+```json
+{
+  "type": "mindmap",
+  "root": {
+    "id": "retro",
+    "label": "Sprint 12 Retro",
+    "children": [
+      {
+        "id": "good",
+        "label": "Went Well",
+        "children": [
+          { "id": "g1", "label": "Shipped on time" },
+          { "id": "g2", "label": "Zero production incidents" },
+          { "id": "g3", "label": "Great code reviews" }
+        ]
+      },
+      {
+        "id": "improve",
+        "label": "Improve",
+        "children": [
+          { "id": "i1", "label": "Flaky tests" },
+          { "id": "i2", "label": "Late requirements" }
+        ]
+      },
+      {
+        "id": "actions",
+        "label": "Action Items",
+        "children": [
+          { "id": "a1", "label": "Fix top 5 flaky tests" },
+          { "id": "a2", "label": "Require specs by Wednesday" }
+        ]
+      }
+    ]
+  }
+}
+```

@@ -1,103 +1,142 @@
-import React, { type ReactNode, type CSSProperties } from 'react'
-import { Diagram, Node, Edge } from '@siren/react'
+"use client";
 
-export interface SequenceProps {
-  className?: string
-  style?: CSSProperties
-  children: ReactNode
+import React, { Children, isValidElement, useMemo } from "react";
+import {
+  ReactFlow,
+  ReactFlowProvider,
+  Background,
+  BackgroundVariant,
+  type Node,
+  type Edge,
+} from "@xyflow/react";
+import { SirenProvider } from "@siren/themes";
+import type { SirenTheme } from "@siren/themes";
+import { Actor } from "./actor";
+import {
+  EDGE_STYLE,
+  EDGE_DASHED_STYLE,
+  EDGE_MARKER,
+  EDGE_LABEL_STYLE,
+  EDGE_LABEL_BG_STYLE,
+  PRO_OPTIONS,
+} from "../shared/edge-styles";
+
+interface SequenceProps {
+  theme?: SirenTheme;
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
 }
+
+const nodeTypes = {
+  actor: Actor,
+};
+
+// Hoisted static style (rendering-hoist-jsx)
+const DEFAULT_WRAPPER_STYLE = { width: "100%", height: "100%" };
+
+// Reply edge uses a dashed variant with same stroke
+const REPLY_EDGE_STYLE = { strokeDasharray: "6 4", ...EDGE_STYLE };
 
 /**
- * Sequence diagram preset.
- * Uses left-to-right layout with specialized actors and messages.
+ * Sequence diagrams use a custom layout (not ELK):
+ * - Actors are placed horizontally with equal spacing
+ * - Messages are rendered as edges between actors at increasing Y positions
  */
-export function Sequence({ className, style, children }: SequenceProps) {
+function SequenceInner({
+  children,
+  className,
+  style,
+}: Omit<SequenceProps, "theme">) {
+  const wrapperStyle = style
+    ? { ...DEFAULT_WRAPPER_STYLE, ...style }
+    : DEFAULT_WRAPPER_STYLE;
+
+  const { nodes, edges } = useMemo(() => {
+    const actors: Array<{ id: string; label: string }> = [];
+    const messages: Array<{
+      from: string;
+      to: string;
+      label?: string;
+      reply?: boolean;
+    }> = [];
+
+    Children.forEach(children, (child) => {
+      if (!isValidElement(child)) return;
+
+      const type = child.type;
+      const props = child.props as Record<string, any>;
+
+      if (type === Actor || (type as any)?.displayName === "Actor") {
+        actors.push({ id: props.id, label: props.label });
+      } else if (props.from && props.to) {
+        messages.push({
+          from: props.from,
+          to: props.to,
+          label: props.label,
+          reply: props.reply,
+        });
+      }
+    });
+
+    const spacing = 200;
+    const nodes: Node[] = actors.map((actor, i) => ({
+      id: actor.id,
+      type: "actor",
+      position: { x: i * spacing, y: 0 },
+      data: { label: actor.label },
+    }));
+
+    const edges: Edge[] = messages.map((msg, i) => ({
+      id: `msg-${i}`,
+      source: msg.from,
+      target: msg.to,
+      label: msg.label,
+      type: "straight",
+      style: msg.reply ? REPLY_EDGE_STYLE : EDGE_STYLE,
+      markerEnd: EDGE_MARKER,
+      labelStyle: EDGE_LABEL_STYLE,
+      labelBgStyle: EDGE_LABEL_BG_STYLE,
+    }));
+
+    return { nodes, edges };
+  }, [children]);
+
   return (
-    <Diagram
-      layout="dagre"
-      direction="LR"
-      spacing={{ node: 60, layer: 80 }}
-      className={className}
-      style={style}
-    >
-      {children}
-    </Diagram>
-  )
+    <div className={className} style={wrapperStyle}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        fitView
+        proOptions={PRO_OPTIONS}
+        nodesDraggable={false}
+        nodesConnectable={false}
+        elementsSelectable={false}
+        minZoom={0.3}
+        maxZoom={2}
+      >
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={16}
+          size={1}
+          color="var(--siren-node-border, hsl(0 0% 18%))"
+        />
+      </ReactFlow>
+    </div>
+  );
 }
 
-// Sub-components
+export function Sequence({ theme, ...props }: SequenceProps) {
+  const inner = (
+    <ReactFlowProvider>
+      <SequenceInner {...props} />
+    </ReactFlowProvider>
+  );
 
-export interface ActorProps {
-  id: string
-  label: string
-  icon?: ReactNode
-  className?: string
+  if (theme) {
+    return <SirenProvider theme={theme}>{inner}</SirenProvider>;
+  }
+
+  return inner;
 }
-
-export function Actor({ id, label, icon, className }: ActorProps) {
-  return (
-    <Node
-      id={id}
-      label={label}
-      icon={icon}
-      shape="rectangle"
-      variant="primary"
-      className={className}
-      style={{
-        minWidth: 100,
-        borderRadius: 4,
-      }}
-    />
-  )
-}
-
-Actor.displayName = 'SirenNode'
-
-export interface ParticipantProps {
-  id: string
-  label: string
-  icon?: ReactNode
-  className?: string
-}
-
-export function Participant({ id, label, icon, className }: ParticipantProps) {
-  return (
-    <Node
-      id={id}
-      label={label}
-      icon={icon}
-      shape="rounded"
-      className={className}
-      style={{ minWidth: 100 }}
-    />
-  )
-}
-
-Participant.displayName = 'SirenNode'
-
-export interface MessageProps {
-  from: string
-  to: string
-  label: string
-  dashed?: boolean
-  className?: string
-}
-
-export function Message({ from, to, label, dashed = false, className }: MessageProps) {
-  return (
-    <Edge
-      from={from}
-      to={to}
-      label={label}
-      type="straight"
-      dashed={dashed}
-      className={className}
-    />
-  )
-}
-
-Message.displayName = 'SirenEdge'
-
-Sequence.Actor = Actor
-Sequence.Participant = Participant
-Sequence.Message = Message

@@ -1,0 +1,185 @@
+---
+title: Block Diagram
+description: Complete syntax reference for Siren block diagrams.
+---
+
+Block diagrams show system components with nested groups and connections. Use them for system overviews, hardware architectures, or logical component layouts.
+
+## Minimal Example
+
+```json
+{
+  "type": "block",
+  "blocks": [
+    { "id": "a", "label": "Input" },
+    { "id": "b", "label": "Process" },
+    { "id": "c", "label": "Output" }
+  ],
+  "connections": [
+    { "from": "a", "to": "b" },
+    { "from": "b", "to": "c" }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "block",
+  "blocks": [
+    {
+      "id": "client",
+      "label": "Client Layer",
+      "children": [
+        { "id": "browser", "label": "Browser" },
+        { "id": "mobile", "label": "Mobile App" }
+      ]
+    },
+    {
+      "id": "server",
+      "label": "Server Layer",
+      "children": [
+        { "id": "api", "label": "REST API" },
+        { "id": "ws", "label": "WebSocket Server" },
+        { "id": "worker", "label": "Background Worker" }
+      ]
+    },
+    {
+      "id": "storage",
+      "label": "Storage Layer",
+      "children": [
+        { "id": "db", "label": "PostgreSQL" },
+        { "id": "cache", "label": "Redis" },
+        { "id": "blob", "label": "Blob Storage" }
+      ]
+    }
+  ],
+  "connections": [
+    { "from": "browser", "to": "api", "label": "HTTPS" },
+    { "from": "browser", "to": "ws", "label": "WSS" },
+    { "from": "mobile", "to": "api", "label": "HTTPS" },
+    { "from": "api", "to": "db" },
+    { "from": "api", "to": "cache" },
+    { "from": "worker", "to": "db" },
+    { "from": "worker", "to": "blob" }
+  ]
+}
+```
+
+## Blocks
+
+Blocks can be flat components or nested containers.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier — connections reference this |
+| `label` | Yes | Display name |
+| `children` | No | Array of nested block objects |
+
+### Nested Blocks
+
+Use `children` to group related components:
+
+```json
+{
+  "id": "backend",
+  "label": "Backend",
+  "children": [
+    { "id": "api", "label": "API" },
+    { "id": "worker", "label": "Worker" }
+  ]
+}
+```
+
+## Connections
+
+Each connection draws a line between two blocks.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `from` | Yes | Source block `id` |
+| `to` | Yes | Target block `id` |
+| `label` | No | Text on the connection |
+
+## More Examples
+
+### Data Pipeline
+
+```json
+{
+  "type": "block",
+  "blocks": [
+    {
+      "id": "sources",
+      "label": "Data Sources",
+      "children": [
+        { "id": "app_db", "label": "App Database" },
+        { "id": "logs", "label": "Log Files" },
+        { "id": "events", "label": "Event Stream" }
+      ]
+    },
+    {
+      "id": "processing",
+      "label": "Processing",
+      "children": [
+        { "id": "ingest", "label": "Ingestion" },
+        { "id": "transform", "label": "Transform" },
+        { "id": "validate", "label": "Validation" }
+      ]
+    },
+    {
+      "id": "output",
+      "label": "Output",
+      "children": [
+        { "id": "warehouse", "label": "Data Warehouse" },
+        { "id": "dashboard", "label": "Dashboard" }
+      ]
+    }
+  ],
+  "connections": [
+    { "from": "app_db", "to": "ingest", "label": "CDC" },
+    { "from": "logs", "to": "ingest", "label": "Filebeat" },
+    { "from": "events", "to": "ingest", "label": "Kafka" },
+    { "from": "ingest", "to": "transform" },
+    { "from": "transform", "to": "validate" },
+    { "from": "validate", "to": "warehouse" },
+    { "from": "warehouse", "to": "dashboard" }
+  ]
+}
+```
+
+### Hardware Architecture
+
+```json
+{
+  "type": "block",
+  "blocks": [
+    {
+      "id": "cpu",
+      "label": "CPU",
+      "children": [
+        { "id": "core1", "label": "Core 1" },
+        { "id": "core2", "label": "Core 2" },
+        { "id": "l2", "label": "L2 Cache" }
+      ]
+    },
+    { "id": "ram", "label": "RAM" },
+    {
+      "id": "io",
+      "label": "I/O",
+      "children": [
+        { "id": "ssd", "label": "SSD" },
+        { "id": "nic", "label": "NIC" }
+      ]
+    }
+  ],
+  "connections": [
+    { "from": "core1", "to": "l2" },
+    { "from": "core2", "to": "l2" },
+    { "from": "l2", "to": "ram", "label": "Memory Bus" },
+    { "from": "ram", "to": "ssd", "label": "DMA" },
+    { "from": "ram", "to": "nic", "label": "DMA" }
+  ]
+}
+```

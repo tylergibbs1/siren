@@ -1,2 +1,45 @@
-export { validate, type ValidationResult, type ValidationError } from './validate'
-export { diagramJsonSchema } from './json-schema'
+export { validate } from "./validate";
+export type {
+  FlowchartSchema,
+  SequenceSchema,
+  StateSchema,
+  ClassSchema,
+  ERSchema,
+  TimelineSchema,
+  KanbanSchema,
+  QuadrantSchema,
+  PieSchema,
+  C4Schema,
+  ArchitectureSchema,
+  BlockSchema,
+  RequirementSchema,
+  MindmapSchema,
+  MindmapNode,
+  GitGraphSchema,
+  GanttSchema,
+  SankeySchema,
+  PacketSchema,
+  SirenSchema,
+  ValidationResult,
+} from "./types";
+
+export {
+  flowchartJsonSchema,
+  sequenceJsonSchema,
+  stateJsonSchema,
+  classJsonSchema,
+  erJsonSchema,
+  timelineJsonSchema,
+  kanbanJsonSchema,
+  quadrantJsonSchema,
+  pieJsonSchema,
+  c4JsonSchema,
+  architectureJsonSchema,
+  blockJsonSchema,
+  requirementJsonSchema,
+  mindmapJsonSchema,
+  gitgraphJsonSchema,
+  ganttJsonSchema,
+  sankeyJsonSchema,
+  packetJsonSchema,
+} from "./json-schema";

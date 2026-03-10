@@ -1,0 +1,108 @@
+---
+title: Requirement Diagram
+description: Complete syntax reference for Siren requirement diagrams.
+---
+
+Requirement diagrams show traceability between requirements, designs, and tests. Use them for compliance tracking, system engineering, or audit documentation.
+
+## Minimal Example
+
+```json
+{
+  "type": "requirement",
+  "requirements": [
+    { "id": "r1", "label": "User Authentication" },
+    { "id": "r2", "label": "Password Policy" }
+  ],
+  "relationships": [
+    { "from": "r1", "to": "r2", "type": "contains" }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "requirement",
+  "requirements": [
+    { "id": "req1", "label": "Secure Login", "kind": "functional", "risk": "high", "status": "approved" },
+    { "id": "req2", "label": "MFA Support", "kind": "functional", "risk": "high", "status": "approved" },
+    { "id": "req3", "label": "Password >= 12 chars", "kind": "performance", "risk": "medium", "status": "approved" },
+    { "id": "des1", "label": "Auth Module Design", "kind": "design", "risk": "low", "status": "implemented" },
+    { "id": "test1", "label": "Login Integration Test", "kind": "test", "risk": "low", "status": "passed" },
+    { "id": "test2", "label": "MFA Unit Test", "kind": "test", "risk": "low", "status": "passed" }
+  ],
+  "relationships": [
+    { "from": "req1", "to": "req2", "type": "contains" },
+    { "from": "req1", "to": "req3", "type": "derives" },
+    { "from": "des1", "to": "req1", "type": "satisfies" },
+    { "from": "test1", "to": "req1", "type": "verifies" },
+    { "from": "test2", "to": "req2", "type": "verifies" },
+    { "from": "req3", "to": "req1", "type": "refines" }
+  ]
+}
+```
+
+## Requirements
+
+Each requirement represents a traceable item.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier — relationships reference this |
+| `label` | Yes | Requirement description |
+| `kind` | No | Category (e.g., `"functional"`, `"performance"`, `"design"`, `"test"`) |
+| `risk` | No | Risk level (e.g., `"low"`, `"medium"`, `"high"`) |
+| `status` | No | Current status (e.g., `"draft"`, `"approved"`, `"implemented"`, `"passed"`) |
+
+```json
+{ "id": "req1", "label": "Encrypt data at rest", "kind": "functional", "risk": "high", "status": "approved" }
+```
+
+## Relationships
+
+Each relationship connects two requirements.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `from` | Yes | Source requirement `id` |
+| `to` | Yes | Target requirement `id` |
+| `type` | Yes | Relationship type (see below) |
+
+### Relationship Types
+
+| Type | Meaning |
+| --- | --- |
+| `"traces"` | General traceability link |
+| `"derives"` | Target is derived from source |
+| `"satisfies"` | Source satisfies the target requirement |
+| `"verifies"` | Source verifies the target requirement |
+| `"refines"` | Source refines or adds detail to target |
+| `"contains"` | Source contains target as a sub-requirement |
+
+## More Examples
+
+### Compliance Traceability
+
+```json
+{
+  "type": "requirement",
+  "requirements": [
+    { "id": "reg1", "label": "GDPR Data Portability", "kind": "functional", "risk": "high", "status": "approved" },
+    { "id": "req1", "label": "Export User Data as JSON", "kind": "functional", "risk": "medium", "status": "implemented" },
+    { "id": "req2", "label": "Export completes in < 30s", "kind": "performance", "risk": "medium", "status": "approved" },
+    { "id": "des1", "label": "Async Export Pipeline", "kind": "design", "risk": "low", "status": "implemented" },
+    { "id": "test1", "label": "Export Endpoint Test", "kind": "test", "risk": "low", "status": "passed" },
+    { "id": "test2", "label": "Performance Benchmark", "kind": "test", "risk": "low", "status": "passed" }
+  ],
+  "relationships": [
+    { "from": "req1", "to": "reg1", "type": "derives" },
+    { "from": "req2", "to": "reg1", "type": "derives" },
+    { "from": "des1", "to": "req1", "type": "satisfies" },
+    { "from": "des1", "to": "req2", "type": "satisfies" },
+    { "from": "test1", "to": "req1", "type": "verifies" },
+    { "from": "test2", "to": "req2", "type": "verifies" }
+  ]
+}
+```

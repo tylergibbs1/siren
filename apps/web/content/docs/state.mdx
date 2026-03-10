@@ -1,0 +1,144 @@
+---
+title: State Diagram
+description: Complete syntax reference for Siren state diagrams.
+---
+
+State diagrams show states and transitions in a finite state machine. Use them to model object lifecycles, UI flows, or protocol states.
+
+## Minimal Example
+
+```json
+{
+  "type": "state",
+  "states": [
+    { "id": "idle", "label": "Idle", "initial": true },
+    { "id": "running", "label": "Running" },
+    { "id": "done", "label": "Done", "final": true }
+  ],
+  "transitions": [
+    { "from": "idle", "to": "running" },
+    { "from": "running", "to": "done" }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "state",
+  "direction": "LR",
+  "states": [
+    { "id": "idle", "label": "Idle", "initial": true },
+    { "id": "fetching", "label": "Fetching", "variant": "primary" },
+    { "id": "success", "label": "Success", "variant": "success" },
+    { "id": "error", "label": "Error", "variant": "danger" },
+    { "id": "retrying", "label": "Retrying", "variant": "warning" },
+    { "id": "exhausted", "label": "Exhausted", "variant": "danger", "final": true }
+  ],
+  "transitions": [
+    { "from": "idle", "to": "fetching", "label": "fetch()" },
+    { "from": "fetching", "to": "success", "label": "200 OK" },
+    { "from": "fetching", "to": "error", "label": "network error" },
+    { "from": "error", "to": "retrying", "label": "retry", "guard": "attempts < 3" },
+    { "from": "error", "to": "exhausted", "label": "give up", "guard": "attempts >= 3" },
+    { "from": "retrying", "to": "fetching" },
+    { "from": "success", "to": "idle", "label": "reset()" }
+  ]
+}
+```
+
+## Direction
+
+Controls which way the diagram flows. Set at the top level.
+
+| Value | Meaning |
+| --- | --- |
+| `"TB"` | Top to bottom (default) |
+| `"BT"` | Bottom to top |
+| `"LR"` | Left to right |
+| `"RL"` | Right to left |
+
+## States
+
+Each state needs a unique `id` and a `label`.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier — transitions reference this |
+| `label` | Yes | Text displayed in the state |
+| `variant` | No | `"default"`, `"primary"`, `"success"`, `"warning"`, or `"danger"` |
+| `initial` | No | `true` to mark as the starting state (filled circle) |
+| `final` | No | `true` to mark as a terminal state (bull's-eye) |
+
+### Initial and Final States
+
+Mark exactly one state as `initial` and one or more as `final`:
+
+```json
+{ "id": "start", "label": "Idle", "initial": true }
+{ "id": "end", "label": "Complete", "final": true }
+```
+
+## Transitions
+
+Each transition connects two states by their `id`.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `from` | Yes | Source state `id` |
+| `to` | Yes | Target state `id` |
+| `label` | No | Text on the arrow (trigger or event name) |
+| `guard` | No | Condition text shown in brackets (e.g., `"attempts < 3"`) |
+
+### Guarded Transitions
+
+Use `guard` to show conditional transitions:
+
+```json
+{ "from": "error", "to": "retry", "label": "retry", "guard": "attempts < 3" }
+```
+
+## More Examples
+
+### Order Lifecycle
+
+```json
+{
+  "type": "state",
+  "direction": "TB",
+  "states": [
+    { "id": "placed", "label": "Placed", "initial": true, "variant": "primary" },
+    { "id": "paid", "label": "Paid", "variant": "success" },
+    { "id": "shipped", "label": "Shipped", "variant": "primary" },
+    { "id": "delivered", "label": "Delivered", "variant": "success", "final": true },
+    { "id": "cancelled", "label": "Cancelled", "variant": "danger", "final": true }
+  ],
+  "transitions": [
+    { "from": "placed", "to": "paid", "label": "payment received" },
+    { "from": "placed", "to": "cancelled", "label": "cancel" },
+    { "from": "paid", "to": "shipped", "label": "ship" },
+    { "from": "paid", "to": "cancelled", "label": "refund" },
+    { "from": "shipped", "to": "delivered", "label": "confirm delivery" }
+  ]
+}
+```
+
+### Traffic Light
+
+```json
+{
+  "type": "state",
+  "direction": "LR",
+  "states": [
+    { "id": "red", "label": "Red", "initial": true, "variant": "danger" },
+    { "id": "green", "label": "Green", "variant": "success" },
+    { "id": "yellow", "label": "Yellow", "variant": "warning" }
+  ],
+  "transitions": [
+    { "from": "red", "to": "green", "label": "timer" },
+    { "from": "green", "to": "yellow", "label": "timer" },
+    { "from": "yellow", "to": "red", "label": "timer" }
+  ]
+}
+```

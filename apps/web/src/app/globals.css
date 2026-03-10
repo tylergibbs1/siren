@@ -1,0 +1,381 @@
+@import "tailwindcss";
+@import "fumadocs-ui/style.css";
+@import "@xyflow/react/dist/style.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Siren Design System
+ *
+ * Built on Radix Colors 12-step scale architecture (same approach as Supabase).
+ * Accent: Radix Blue | Gray: Radix Slate
+ *
+ * Scale use cases (from Radix docs):
+ *   1-2   App backgrounds, subtle backgrounds
+ *   3-5   Component backgrounds (normal, hover, active)
+ *   6-8   Borders (subtle, interactive, strong/focus)
+ *   9-10  Solid backgrounds (primary, hover)
+ *   11-12 Text (secondary, primary)
+ */
+
+:root {
+  /* ---- Radix Slate (light) ---- */
+  --slate-1: #fcfcfd;
+  --slate-2: #f9f9fb;
+  --slate-3: #f0f0f3;
+  --slate-4: #e8e8ec;
+  --slate-5: #e0e1e6;
+  --slate-6: #d9d9e0;
+  --slate-7: #cdced6;
+  --slate-8: #b9bbc6;
+  --slate-9: #8b8d98;
+  --slate-10: #80838d;
+  --slate-11: #60646c;
+  --slate-12: #1c2024;
+
+  /* ---- Radix Blue (light) ---- */
+  --blue-1: #fbfdff;
+  --blue-2: #f4faff;
+  --blue-3: #e6f4fe;
+  --blue-4: #d5efff;
+  --blue-5: #c2e5ff;
+  --blue-6: #acd8fc;
+  --blue-7: #8ec8f6;
+  --blue-8: #5eb1ef;
+  --blue-9: #0090ff;
+  --blue-10: #0588f0;
+  --blue-11: #0d74ce;
+  --blue-12: #113264;
+
+  /* ---- Scale (aliases gray to slate) ---- */
+  --scale-1: var(--slate-1);
+  --scale-2: var(--slate-2);
+  --scale-3: var(--slate-3);
+  --scale-4: var(--slate-4);
+  --scale-5: var(--slate-5);
+  --scale-6: var(--slate-6);
+  --scale-7: var(--slate-7);
+  --scale-8: var(--slate-8);
+  --scale-9: var(--slate-9);
+  --scale-10: var(--slate-10);
+  --scale-11: var(--slate-11);
+  --scale-12: var(--slate-12);
+
+  /* ---- Semantic tokens (mapped to scale steps) ---- */
+  --background: var(--scale-1);
+  --foreground: var(--scale-12);
+  --card: var(--scale-1);
+  --card-foreground: var(--scale-12);
+  --popover: var(--scale-1);
+  --popover-foreground: var(--scale-11);
+  --primary: var(--blue-9);
+  --primary-foreground: #fff;
+  --secondary: var(--scale-2);
+  --secondary-foreground: var(--scale-12);
+  --muted: var(--scale-3);
+  --muted-foreground: var(--scale-11);
+  --accent: var(--blue-3);
+  --accent-foreground: var(--blue-11);
+  --destructive: #e5484d;
+  --destructive-foreground: #fff;
+  --border: var(--scale-6);
+  --input: var(--scale-4);
+  --ring: var(--blue-8);
+
+  /* ---- Chart palette ---- */
+  --chart-1: var(--blue-9);
+  --chart-2: #8ec8f6;
+  --chart-3: #0d74ce;
+  --chart-4: #d5efff;
+  --chart-5: #113264;
+
+  /* ---- Sidebar ---- */
+  --sidebar: var(--scale-2);
+  --sidebar-foreground: var(--scale-11);
+  --sidebar-primary: var(--blue-9);
+  --sidebar-primary-foreground: #fff;
+  --sidebar-accent: var(--scale-3);
+  --sidebar-accent-foreground: var(--scale-12);
+  --sidebar-border: var(--scale-6);
+  --sidebar-ring: var(--blue-8);
+
+  /* ---- Status colors (Radix) ---- */
+  --success: #30a46c;
+  --success-foreground: #fff;
+  --warning: #ffc53d;
+  --warning-foreground: #21201c;
+  --info: var(--blue-9);
+  --info-foreground: #fff;
+
+  /* ---- Typography ---- */
+  --font-sans: Outfit, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, monospace;
+
+  /* ---- Shape ---- */
+  --radius: 0.5rem;
+
+  /* ---- Shadows (cool-tinted for blue brand) ---- */
+  --shadow-2xs: 0px 1px 2px 0px hsl(220 20% 20% / 0.04);
+  --shadow-xs: 0px 1px 3px 0px hsl(220 20% 20% / 0.06);
+  --shadow-sm: 0px 1px 3px 0px hsl(220 20% 20% / 0.08), 0px 1px 2px -1px hsl(220 20% 20% / 0.08);
+  --shadow: 0px 1px 3px 0px hsl(220 20% 20% / 0.1), 0px 1px 2px -1px hsl(220 20% 20% / 0.1);
+  --shadow-md: 0px 2px 6px 0px hsl(220 20% 20% / 0.1), 0px 2px 4px -2px hsl(220 20% 20% / 0.1);
+  --shadow-lg: 0px 4px 12px 0px hsl(220 20% 20% / 0.1), 0px 4px 6px -2px hsl(220 20% 20% / 0.08);
+  --shadow-xl: 0px 8px 20px 0px hsl(220 20% 20% / 0.12), 0px 8px 10px -4px hsl(220 20% 20% / 0.08);
+  --shadow-2xl: 0px 16px 40px 0px hsl(220 20% 20% / 0.2);
+
+  --tracking-normal: 0.01em;
+}
+
+.dark {
+  /* ---- Achromatic Gray (dark) — Supabase-inspired pure neutrals ---- */
+  --slate-1: #121212;
+  --slate-2: #171717;
+  --slate-3: #212121;
+  --slate-4: #282828;
+  --slate-5: #303030;
+  --slate-6: #3a3a3a;
+  --slate-7: #484848;
+  --slate-8: #606060;
+  --slate-9: #6e6e6e;
+  --slate-10: #7c7c7c;
+  --slate-11: #b4b4b4;
+  --slate-12: #eeeeee;
+
+  /* ---- Radix Blue (dark) ---- */
+  --blue-1: #0d1520;
+  --blue-2: #111927;
+  --blue-3: #0d2847;
+  --blue-4: #003362;
+  --blue-5: #004074;
+  --blue-6: #104d87;
+  --blue-7: #205d9e;
+  --blue-8: #2870bd;
+  --blue-9: #0090ff;
+  --blue-10: #3b9eff;
+  --blue-11: #70b8ff;
+  --blue-12: #c2e6ff;
+
+  /* ---- Semantic overrides for dark ---- */
+  --background: var(--scale-1);
+  --foreground: var(--scale-12);
+  --card: var(--scale-2);
+  --card-foreground: var(--scale-12);
+  --popover: var(--scale-3);
+  --popover-foreground: var(--scale-11);
+  --primary: var(--blue-9);
+  --primary-foreground: #fff;
+  --secondary: var(--scale-3);
+  --secondary-foreground: var(--scale-12);
+  --muted: var(--scale-3);
+  --muted-foreground: var(--scale-11);
+  --accent: var(--blue-3);
+  --accent-foreground: var(--blue-11);
+  --destructive: #e5484d;
+  --destructive-foreground: #fff;
+  --border: var(--scale-6);
+  --input: var(--scale-3);
+  --ring: var(--blue-7);
+
+  /* ---- Chart palette (dark) ---- */
+  --chart-1: var(--blue-9);
+  --chart-2: #70b8ff;
+  --chart-3: #205d9e;
+  --chart-4: #3b9eff;
+  --chart-5: #c2e6ff;
+
+  /* ---- Sidebar (dark) ---- */
+  --sidebar: var(--scale-1);
+  --sidebar-foreground: var(--scale-11);
+  --sidebar-primary: var(--blue-9);
+  --sidebar-primary-foreground: #fff;
+  --sidebar-accent: var(--scale-3);
+  --sidebar-accent-foreground: var(--scale-12);
+  --sidebar-border: var(--scale-6);
+  --sidebar-ring: var(--blue-7);
+
+  /* ---- Status (dark) ---- */
+  --success: #30a46c;
+  --success-foreground: #fff;
+  --warning: #ffc53d;
+  --warning-foreground: #21201c;
+
+  /* ---- Shadows (dark) ---- */
+  --shadow-2xs: 0px 1px 2px 0px hsl(0 0% 0% / 0.15);
+  --shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.2);
+  --shadow-sm: 0px 1px 3px 0px hsl(0 0% 0% / 0.25), 0px 1px 2px -1px hsl(0 0% 0% / 0.25);
+  --shadow: 0px 1px 3px 0px hsl(0 0% 0% / 0.3), 0px 1px 2px -1px hsl(0 0% 0% / 0.3);
+  --shadow-md: 0px 2px 6px 0px hsl(0 0% 0% / 0.3), 0px 2px 4px -2px hsl(0 0% 0% / 0.3);
+  --shadow-lg: 0px 4px 12px 0px hsl(0 0% 0% / 0.35), 0px 4px 6px -2px hsl(0 0% 0% / 0.25);
+  --shadow-xl: 0px 8px 20px 0px hsl(0 0% 0% / 0.4), 0px 8px 10px -4px hsl(0 0% 0% / 0.3);
+  --shadow-2xl: 0px 16px 40px 0px hsl(0 0% 0% / 0.55);
+}
+
+@theme inline {
+  /* ---- Semantic color tokens ---- */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ---- Scale tokens (direct scale access in Tailwind) ---- */
+  --color-scale-1: var(--scale-1);
+  --color-scale-2: var(--scale-2);
+  --color-scale-3: var(--scale-3);
+  --color-scale-4: var(--scale-4);
+  --color-scale-5: var(--scale-5);
+  --color-scale-6: var(--scale-6);
+  --color-scale-7: var(--scale-7);
+  --color-scale-8: var(--scale-8);
+  --color-scale-9: var(--scale-9);
+  --color-scale-10: var(--scale-10);
+  --color-scale-11: var(--scale-11);
+  --color-scale-12: var(--scale-12);
+
+  /* ---- Accent tokens (direct accent access in Tailwind) ---- */
+  --color-accent-1: var(--blue-1);
+  --color-accent-2: var(--blue-2);
+  --color-accent-3: var(--blue-3);
+  --color-accent-4: var(--blue-4);
+  --color-accent-5: var(--blue-5);
+  --color-accent-6: var(--blue-6);
+  --color-accent-7: var(--blue-7);
+  --color-accent-8: var(--blue-8);
+  --color-accent-9: var(--blue-9);
+  --color-accent-10: var(--blue-10);
+  --color-accent-11: var(--blue-11);
+  --color-accent-12: var(--blue-12);
+
+  /* ---- Status tokens ---- */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+
+  /* ---- Typography ---- */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+
+  /* ---- Radius ---- */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* ---- Shadows ---- */
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+
+  /* ---- Tracking ---- */
+  --tracking-tighter: calc(var(--tracking-normal) - 0.04em);
+  --tracking-tight: calc(var(--tracking-normal) - 0.02em);
+  --tracking-normal: var(--tracking-normal);
+  --tracking-wide: calc(var(--tracking-normal) + 0.02em);
+  --tracking-wider: calc(var(--tracking-normal) + 0.04em);
+  --tracking-widest: calc(var(--tracking-normal) + 0.08em);
+}
+
+/*
+ * Fumadocs theme overrides
+ *
+ * Fumadocs ships its own achromatic palette via --color-fd-* variables.
+ * We override to: (1) inject our blue brand accent as fd-primary,
+ * (2) align surfaces precisely with our scale tokens, and
+ * (3) ensure borders/rings match the rest of the design system.
+ */
+:root {
+  --color-fd-background: var(--scale-1);
+  --color-fd-foreground: var(--scale-12);
+  --color-fd-muted: var(--scale-3);
+  --color-fd-muted-foreground: var(--scale-11);
+  --color-fd-popover: var(--scale-1);
+  --color-fd-popover-foreground: var(--scale-11);
+  --color-fd-card: var(--scale-2);
+  --color-fd-card-foreground: var(--scale-12);
+  --color-fd-border: var(--scale-6);
+  --color-fd-primary: var(--blue-11);
+  --color-fd-primary-foreground: #fff;
+  --color-fd-secondary: var(--scale-3);
+  --color-fd-secondary-foreground: var(--scale-12);
+  --color-fd-accent: var(--scale-4);
+  --color-fd-accent-foreground: var(--scale-12);
+  --color-fd-ring: var(--blue-8);
+}
+
+.dark {
+  --color-fd-background: var(--scale-1);
+  --color-fd-foreground: var(--scale-12);
+  --color-fd-muted: var(--scale-3);
+  --color-fd-muted-foreground: var(--scale-11);
+  --color-fd-popover: var(--scale-3);
+  --color-fd-popover-foreground: var(--scale-11);
+  --color-fd-card: var(--scale-2);
+  --color-fd-card-foreground: var(--scale-12);
+  --color-fd-border: var(--scale-6);
+  --color-fd-primary: var(--blue-11);
+  --color-fd-primary-foreground: hsl(0 0% 9%);
+  --color-fd-secondary: var(--scale-3);
+  --color-fd-secondary-foreground: var(--scale-12);
+  --color-fd-accent: var(--scale-4);
+  --color-fd-accent-foreground: var(--scale-12);
+  --color-fd-ring: var(--blue-7);
+}
+
+.dark #nd-sidebar {
+  --color-fd-muted: var(--scale-4);
+  --color-fd-secondary: var(--scale-5);
+  --color-fd-muted-foreground: var(--scale-11);
+}
+
+/* Monaco editor customizations */
+.monaco-editor .margin {
+  background: transparent !important;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    letter-spacing: var(--tracking-normal);
+  }
+}

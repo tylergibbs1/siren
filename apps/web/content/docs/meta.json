@@ -1,0 +1,28 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "---Diagram Types---",
+    "flowchart",
+    "sequence",
+    "state",
+    "class",
+    "er",
+    "---Data & Charts---",
+    "pie",
+    "gantt",
+    "timeline",
+    "kanban",
+    "quadrant",
+    "sankey",
+    "---Architecture---",
+    "c4",
+    "architecture",
+    "block",
+    "---Specialized---",
+    "mindmap",
+    "gitgraph",
+    "requirement",
+    "packet"
+  ]
+}

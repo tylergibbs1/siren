@@ -1,0 +1,109 @@
+---
+title: Git Graph
+description: Complete syntax reference for Siren git graph diagrams.
+---
+
+Git graphs show commit history, branching, and merging. Use them to illustrate branching strategies, release flows, or explain complex merge scenarios.
+
+## Minimal Example
+
+```json
+{
+  "type": "gitgraph",
+  "commits": [
+    { "id": "c1", "message": "Initial commit", "branch": "main" },
+    { "id": "c2", "message": "Add feature", "branch": "main", "parent": "c1" }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "gitgraph",
+  "commits": [
+    { "id": "c1", "message": "Initial commit", "branch": "main" },
+    { "id": "c2", "message": "Add user model", "branch": "main", "parent": "c1" },
+    { "id": "c3", "message": "Start auth feature", "branch": "feature/auth", "parent": "c2" },
+    { "id": "c4", "message": "Add login endpoint", "branch": "feature/auth", "parent": "c3" },
+    { "id": "c5", "message": "Fix typo in README", "branch": "main", "parent": "c2" },
+    { "id": "c6", "message": "Merge auth feature", "branch": "main", "parents": ["c5", "c4"], "merge": true },
+    { "id": "c7", "message": "Release v1.0", "branch": "main", "parent": "c6" }
+  ]
+}
+```
+
+## Commits
+
+Commits are displayed in the order you list them.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier (like a short SHA) |
+| `message` | Yes | Commit message text |
+| `branch` | Yes | Branch name this commit belongs to |
+| `parent` | No | Single parent commit `id` |
+| `parents` | No | Array of parent commit `id`s (for merge commits) |
+| `merge` | No | `true` to display as a merge commit |
+
+### Regular Commits
+
+A commit with a single parent:
+
+```json
+{ "id": "c2", "message": "Add feature", "branch": "main", "parent": "c1" }
+```
+
+### Merge Commits
+
+Use `parents` (array) and `merge: true` for merge commits:
+
+```json
+{ "id": "c6", "message": "Merge feature branch", "branch": "main", "parents": ["c4", "c5"], "merge": true }
+```
+
+### Branch Points
+
+Create a new branch by setting a different `branch` with a `parent` on the source branch:
+
+```json
+{ "id": "c3", "message": "Start feature", "branch": "feature/login", "parent": "c2" }
+```
+
+## More Examples
+
+### Git Flow
+
+```json
+{
+  "type": "gitgraph",
+  "commits": [
+    { "id": "c1", "message": "Initial commit", "branch": "main" },
+    { "id": "d1", "message": "Start develop", "branch": "develop", "parent": "c1" },
+    { "id": "f1", "message": "Add search UI", "branch": "feature/search", "parent": "d1" },
+    { "id": "f2", "message": "Add search API", "branch": "feature/search", "parent": "f1" },
+    { "id": "d2", "message": "Merge search", "branch": "develop", "parents": ["d1", "f2"], "merge": true },
+    { "id": "r1", "message": "Release branch", "branch": "release/1.0", "parent": "d2" },
+    { "id": "r2", "message": "Fix release bug", "branch": "release/1.0", "parent": "r1" },
+    { "id": "c2", "message": "Merge release to main", "branch": "main", "parents": ["c1", "r2"], "merge": true },
+    { "id": "d3", "message": "Merge release to develop", "branch": "develop", "parents": ["d2", "r2"], "merge": true }
+  ]
+}
+```
+
+### Hotfix Workflow
+
+```json
+{
+  "type": "gitgraph",
+  "commits": [
+    { "id": "c1", "message": "v1.0 release", "branch": "main" },
+    { "id": "d1", "message": "New feature WIP", "branch": "develop", "parent": "c1" },
+    { "id": "h1", "message": "Critical bug fix", "branch": "hotfix/bug-123", "parent": "c1" },
+    { "id": "h2", "message": "Add regression test", "branch": "hotfix/bug-123", "parent": "h1" },
+    { "id": "c2", "message": "Merge hotfix to main", "branch": "main", "parents": ["c1", "h2"], "merge": true },
+    { "id": "d2", "message": "Merge hotfix to develop", "branch": "develop", "parents": ["d1", "h2"], "merge": true }
+  ]
+}
+```

@@ -1,0 +1,163 @@
+---
+title: Architecture Diagram
+description: Complete syntax reference for Siren architecture diagrams.
+---
+
+Architecture diagrams show system infrastructure with grouped services and connections between them. Use them for cloud infrastructure, deployment topologies, or service maps.
+
+## Minimal Example
+
+```json
+{
+  "type": "architecture",
+  "groups": [
+    {
+      "id": "backend",
+      "label": "Backend",
+      "services": [
+        { "id": "api", "label": "API Server" },
+        { "id": "db", "label": "Database" }
+      ]
+    }
+  ],
+  "connections": [
+    { "from": "api", "to": "db" }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "architecture",
+  "groups": [
+    {
+      "id": "frontend",
+      "label": "Frontend",
+      "services": [
+        { "id": "cdn", "label": "CDN" },
+        { "id": "web", "label": "Web App" }
+      ]
+    },
+    {
+      "id": "backend",
+      "label": "Backend Services",
+      "services": [
+        { "id": "gateway", "label": "API Gateway" },
+        { "id": "auth", "label": "Auth Service" },
+        { "id": "core", "label": "Core API" }
+      ]
+    },
+    {
+      "id": "data",
+      "label": "Data Layer",
+      "services": [
+        { "id": "postgres", "label": "PostgreSQL" },
+        { "id": "redis", "label": "Redis Cache" },
+        { "id": "s3", "label": "S3 Storage" }
+      ]
+    }
+  ],
+  "services": [
+    { "id": "user", "label": "User" }
+  ],
+  "connections": [
+    { "from": "user", "to": "cdn", "label": "HTTPS" },
+    { "from": "cdn", "to": "web" },
+    { "from": "web", "to": "gateway", "label": "REST" },
+    { "from": "gateway", "to": "auth", "label": "Validate token" },
+    { "from": "gateway", "to": "core" },
+    { "from": "core", "to": "postgres", "label": "SQL" },
+    { "from": "core", "to": "redis", "label": "Cache reads" },
+    { "from": "core", "to": "s3", "label": "File uploads" }
+  ]
+}
+```
+
+## Groups
+
+Groups visually cluster related services together.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier |
+| `label` | Yes | Group heading |
+| `services` | Yes | Array of service objects within this group |
+
+## Services
+
+Services represent individual system components. They can live inside a group or at the top level.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier — connections reference this |
+| `label` | Yes | Display name |
+
+Top-level `services` (outside of groups) are displayed as standalone nodes:
+
+```json
+{
+  "services": [
+    { "id": "user", "label": "External Client" }
+  ]
+}
+```
+
+## Connections
+
+Each connection draws a line between two services.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `from` | Yes | Source service `id` |
+| `to` | Yes | Target service `id` |
+| `label` | No | Text on the connection (protocol, description) |
+
+## More Examples
+
+### Microservices with Message Queue
+
+```json
+{
+  "type": "architecture",
+  "groups": [
+    {
+      "id": "ingress",
+      "label": "Ingress",
+      "services": [
+        { "id": "lb", "label": "Load Balancer" },
+        { "id": "gateway", "label": "API Gateway" }
+      ]
+    },
+    {
+      "id": "services",
+      "label": "Services",
+      "services": [
+        { "id": "users", "label": "User Service" },
+        { "id": "orders", "label": "Order Service" },
+        { "id": "notify", "label": "Notification Service" }
+      ]
+    },
+    {
+      "id": "infra",
+      "label": "Infrastructure",
+      "services": [
+        { "id": "db", "label": "PostgreSQL" },
+        { "id": "queue", "label": "RabbitMQ" },
+        { "id": "cache", "label": "Redis" }
+      ]
+    }
+  ],
+  "connections": [
+    { "from": "lb", "to": "gateway" },
+    { "from": "gateway", "to": "users" },
+    { "from": "gateway", "to": "orders" },
+    { "from": "orders", "to": "queue", "label": "Publish events" },
+    { "from": "queue", "to": "notify", "label": "Consume events" },
+    { "from": "users", "to": "db" },
+    { "from": "orders", "to": "db" },
+    { "from": "users", "to": "cache" }
+  ]
+}
+```

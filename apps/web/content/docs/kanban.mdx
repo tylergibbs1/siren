@@ -1,0 +1,126 @@
+---
+title: Kanban Board
+description: Complete syntax reference for Siren kanban board diagrams.
+---
+
+Kanban boards show cards organized into columns. Use them for task tracking, workflow stages, or sprint boards.
+
+## Minimal Example
+
+```json
+{
+  "type": "kanban",
+  "columns": [
+    { "id": "todo", "label": "To Do", "cards": [{ "id": "t1", "label": "Design mockups" }] },
+    { "id": "doing", "label": "In Progress", "cards": [{ "id": "t2", "label": "Build API" }] },
+    { "id": "done", "label": "Done", "cards": [{ "id": "t3", "label": "Set up repo" }] }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "kanban",
+  "columns": [
+    {
+      "id": "backlog",
+      "label": "Backlog",
+      "cards": [
+        { "id": "c1", "label": "Add dark mode", "tag": "feature" },
+        { "id": "c2", "label": "Improve error messages", "tag": "ux" }
+      ]
+    },
+    {
+      "id": "progress",
+      "label": "In Progress",
+      "cards": [
+        { "id": "c3", "label": "OAuth integration", "tag": "feature" },
+        { "id": "c4", "label": "Fix memory leak", "tag": "bug" }
+      ]
+    },
+    {
+      "id": "review",
+      "label": "In Review",
+      "cards": [
+        { "id": "c5", "label": "Update API docs", "tag": "docs" }
+      ]
+    },
+    {
+      "id": "done",
+      "label": "Done",
+      "cards": [
+        { "id": "c6", "label": "Set up CI/CD", "tag": "infra" },
+        { "id": "c7", "label": "User signup flow", "tag": "feature" }
+      ]
+    }
+  ]
+}
+```
+
+## Columns
+
+Columns are displayed left-to-right in the order you list them.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier |
+| `label` | Yes | Column heading text |
+| `cards` | Yes | Array of card objects |
+
+## Cards
+
+Cards appear within their parent column in the order you list them.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier |
+| `label` | Yes | Card title text |
+| `tag` | No | Category label (e.g., `"bug"`, `"feature"`, `"docs"`) |
+
+```json
+{ "id": "c1", "label": "Fix login timeout", "tag": "bug" }
+```
+
+## More Examples
+
+### Sprint Board
+
+```json
+{
+  "type": "kanban",
+  "columns": [
+    {
+      "id": "todo",
+      "label": "Sprint Backlog",
+      "cards": [
+        { "id": "s1", "label": "Search endpoint", "tag": "backend" },
+        { "id": "s2", "label": "Search UI", "tag": "frontend" }
+      ]
+    },
+    {
+      "id": "dev",
+      "label": "Development",
+      "cards": [
+        { "id": "s3", "label": "Auth middleware", "tag": "backend" }
+      ]
+    },
+    {
+      "id": "qa",
+      "label": "QA",
+      "cards": [
+        { "id": "s4", "label": "Profile page tests", "tag": "testing" }
+      ]
+    },
+    {
+      "id": "done",
+      "label": "Done",
+      "cards": [
+        { "id": "s5", "label": "Database migrations", "tag": "backend" },
+        { "id": "s6", "label": "Landing page", "tag": "frontend" }
+      ]
+    }
+  ]
+}
+```

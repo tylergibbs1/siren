@@ -1,0 +1,174 @@
+---
+title: ER Diagram
+description: Complete syntax reference for Siren entity-relationship diagrams.
+---
+
+ER diagrams show database entities, their columns, and the relationships between tables. Use them to document schema designs or plan data models.
+
+## Minimal Example
+
+```json
+{
+  "type": "er",
+  "entities": [
+    { "id": "user", "name": "User", "columns": [{ "name": "id", "type": "uuid", "pk": true }] },
+    { "id": "post", "name": "Post", "columns": [{ "name": "id", "type": "uuid", "pk": true }] }
+  ],
+  "relationships": [
+    { "from": "user", "to": "post", "cardinality": "1:N" }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "er",
+  "entities": [
+    {
+      "id": "user",
+      "name": "User",
+      "columns": [
+        { "name": "id", "type": "uuid", "pk": true },
+        { "name": "email", "type": "varchar", "unique": true },
+        { "name": "name", "type": "varchar" },
+        { "name": "created_at", "type": "timestamp" }
+      ]
+    },
+    {
+      "id": "order",
+      "name": "Order",
+      "columns": [
+        { "name": "id", "type": "uuid", "pk": true },
+        { "name": "user_id", "type": "uuid", "fk": true },
+        { "name": "total", "type": "decimal" },
+        { "name": "status", "type": "varchar" }
+      ]
+    },
+    {
+      "id": "product",
+      "name": "Product",
+      "columns": [
+        { "name": "id", "type": "uuid", "pk": true },
+        { "name": "name", "type": "varchar" },
+        { "name": "price", "type": "decimal" }
+      ]
+    },
+    {
+      "id": "orderItem",
+      "name": "OrderItem",
+      "columns": [
+        { "name": "id", "type": "uuid", "pk": true },
+        { "name": "order_id", "type": "uuid", "fk": true },
+        { "name": "product_id", "type": "uuid", "fk": true },
+        { "name": "quantity", "type": "integer" }
+      ]
+    }
+  ],
+  "relationships": [
+    { "from": "user", "to": "order", "cardinality": "1:N", "label": "places" },
+    { "from": "order", "to": "orderItem", "cardinality": "1:N", "label": "contains" },
+    { "from": "product", "to": "orderItem", "cardinality": "1:N", "label": "appears in" }
+  ]
+}
+```
+
+## Entities
+
+Each entity represents a database table.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier — relationships reference this |
+| `name` | Yes | Display name shown in the entity header |
+| `columns` | Yes | Array of column objects |
+
+## Columns
+
+Each column describes a table field.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `name` | Yes | Column name |
+| `type` | Yes | Data type (e.g., `"uuid"`, `"varchar"`, `"integer"`) |
+| `pk` | No | `true` to mark as primary key |
+| `fk` | No | `true` to mark as foreign key |
+| `unique` | No | `true` to mark as unique |
+
+```json
+{ "name": "email", "type": "varchar", "unique": true }
+```
+
+## Relationships
+
+Each relationship connects two entities.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `from` | Yes | Source entity `id` |
+| `to` | Yes | Target entity `id` |
+| `cardinality` | Yes | `"1:1"`, `"1:N"`, `"N:1"`, or `"M:N"` |
+| `label` | No | Description of the relationship |
+
+### Cardinality
+
+| Value | Meaning |
+| --- | --- |
+| `"1:1"` | One-to-one |
+| `"1:N"` | One-to-many |
+| `"N:1"` | Many-to-one |
+| `"M:N"` | Many-to-many |
+
+## More Examples
+
+### Blog Platform
+
+```json
+{
+  "type": "er",
+  "entities": [
+    {
+      "id": "author",
+      "name": "Author",
+      "columns": [
+        { "name": "id", "type": "uuid", "pk": true },
+        { "name": "username", "type": "varchar", "unique": true },
+        { "name": "bio", "type": "text" }
+      ]
+    },
+    {
+      "id": "post",
+      "name": "Post",
+      "columns": [
+        { "name": "id", "type": "uuid", "pk": true },
+        { "name": "author_id", "type": "uuid", "fk": true },
+        { "name": "title", "type": "varchar" },
+        { "name": "body", "type": "text" },
+        { "name": "published_at", "type": "timestamp" }
+      ]
+    },
+    {
+      "id": "tag",
+      "name": "Tag",
+      "columns": [
+        { "name": "id", "type": "uuid", "pk": true },
+        { "name": "name", "type": "varchar", "unique": true }
+      ]
+    },
+    {
+      "id": "postTag",
+      "name": "PostTag",
+      "columns": [
+        { "name": "post_id", "type": "uuid", "fk": true },
+        { "name": "tag_id", "type": "uuid", "fk": true }
+      ]
+    }
+  ],
+  "relationships": [
+    { "from": "author", "to": "post", "cardinality": "1:N", "label": "writes" },
+    { "from": "post", "to": "postTag", "cardinality": "1:N" },
+    { "from": "tag", "to": "postTag", "cardinality": "1:N" }
+  ]
+}
+```

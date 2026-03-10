@@ -1,0 +1,137 @@
+---
+title: Sankey Diagram
+description: Complete syntax reference for Siren sankey diagrams.
+---
+
+Sankey diagrams show flow quantities between nodes. The width of each link is proportional to the flow value. Use them for energy flows, budget allocation, or user journey analysis.
+
+## Minimal Example
+
+```json
+{
+  "type": "sankey",
+  "nodes": [
+    { "id": "a", "label": "Source" },
+    { "id": "b", "label": "Target" }
+  ],
+  "flows": [
+    { "from": "a", "to": "b", "value": 100 }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "sankey",
+  "nodes": [
+    { "id": "budget", "label": "Total Budget" },
+    { "id": "eng", "label": "Engineering" },
+    { "id": "marketing", "label": "Marketing" },
+    { "id": "ops", "label": "Operations" },
+    { "id": "salaries", "label": "Salaries" },
+    { "id": "infra", "label": "Infrastructure" },
+    { "id": "ads", "label": "Paid Ads" },
+    { "id": "content", "label": "Content" },
+    { "id": "office", "label": "Office" },
+    { "id": "tools", "label": "Tools" }
+  ],
+  "flows": [
+    { "from": "budget", "to": "eng", "value": 500 },
+    { "from": "budget", "to": "marketing", "value": 200 },
+    { "from": "budget", "to": "ops", "value": 150 },
+    { "from": "eng", "to": "salaries", "value": 400 },
+    { "from": "eng", "to": "infra", "value": 100 },
+    { "from": "marketing", "to": "ads", "value": 120 },
+    { "from": "marketing", "to": "content", "value": 80 },
+    { "from": "ops", "to": "office", "value": 100 },
+    { "from": "ops", "to": "tools", "value": 50 }
+  ]
+}
+```
+
+## Nodes
+
+Each node is a point where flows converge or diverge.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier — flows reference this |
+| `label` | Yes | Display name |
+
+```json
+{ "id": "eng", "label": "Engineering" }
+```
+
+## Flows
+
+Each flow is a link between two nodes. The `value` determines the visual width.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `from` | Yes | Source node `id` |
+| `to` | Yes | Target node `id` |
+| `value` | Yes | Numeric quantity (determines link width) |
+
+```json
+{ "from": "budget", "to": "engineering", "value": 500 }
+```
+
+## More Examples
+
+### Website Traffic Flow
+
+```json
+{
+  "type": "sankey",
+  "nodes": [
+    { "id": "organic", "label": "Organic Search" },
+    { "id": "social", "label": "Social Media" },
+    { "id": "direct", "label": "Direct" },
+    { "id": "landing", "label": "Landing Page" },
+    { "id": "docs", "label": "Documentation" },
+    { "id": "signup", "label": "Sign Up" },
+    { "id": "bounce", "label": "Bounce" },
+    { "id": "trial", "label": "Free Trial" },
+    { "id": "paid", "label": "Paid Plan" }
+  ],
+  "flows": [
+    { "from": "organic", "to": "landing", "value": 5000 },
+    { "from": "organic", "to": "docs", "value": 3000 },
+    { "from": "social", "to": "landing", "value": 2000 },
+    { "from": "direct", "to": "landing", "value": 1500 },
+    { "from": "landing", "to": "signup", "value": 4000 },
+    { "from": "landing", "to": "bounce", "value": 4500 },
+    { "from": "docs", "to": "signup", "value": 1500 },
+    { "from": "signup", "to": "trial", "value": 4500 },
+    { "from": "signup", "to": "bounce", "value": 1000 },
+    { "from": "trial", "to": "paid", "value": 1200 }
+  ]
+}
+```
+
+### Energy Production
+
+```json
+{
+  "type": "sankey",
+  "nodes": [
+    { "id": "solar", "label": "Solar" },
+    { "id": "wind", "label": "Wind" },
+    { "id": "gas", "label": "Natural Gas" },
+    { "id": "grid", "label": "Power Grid" },
+    { "id": "residential", "label": "Residential" },
+    { "id": "commercial", "label": "Commercial" },
+    { "id": "industrial", "label": "Industrial" }
+  ],
+  "flows": [
+    { "from": "solar", "to": "grid", "value": 300 },
+    { "from": "wind", "to": "grid", "value": 250 },
+    { "from": "gas", "to": "grid", "value": 450 },
+    { "from": "grid", "to": "residential", "value": 400 },
+    { "from": "grid", "to": "commercial", "value": 350 },
+    { "from": "grid", "to": "industrial", "value": 250 }
+  ]
+}
+```

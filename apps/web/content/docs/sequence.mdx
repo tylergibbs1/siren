@@ -1,0 +1,121 @@
+---
+title: Sequence Diagram
+description: Complete syntax reference for Siren sequence diagrams.
+---
+
+Sequence diagrams show communication between actors over time. Actors are arranged left-to-right, messages flow top-to-bottom in declaration order.
+
+## Minimal Example
+
+```json
+{
+  "type": "sequence",
+  "actors": [
+    { "id": "a", "label": "Client" },
+    { "id": "b", "label": "Server" }
+  ],
+  "messages": [
+    { "from": "a", "to": "b", "label": "Request" },
+    { "from": "b", "to": "a", "label": "Response", "reply": true }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "sequence",
+  "actors": [
+    { "id": "user", "label": "User" },
+    { "id": "api", "label": "API Server" },
+    { "id": "auth", "label": "Auth Service" },
+    { "id": "db", "label": "Database" }
+  ],
+  "messages": [
+    { "from": "user", "to": "api", "label": "POST /login" },
+    { "from": "api", "to": "auth", "label": "Validate credentials" },
+    { "from": "auth", "to": "db", "label": "SELECT user" },
+    { "from": "db", "to": "auth", "label": "user row", "reply": true },
+    { "from": "auth", "to": "api", "label": "JWT token", "reply": true },
+    { "from": "api", "to": "user", "label": "200 OK + token", "reply": true }
+  ]
+}
+```
+
+## Actors
+
+Actors are the participants in the sequence. They appear as columns from left to right in the order you list them.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier — messages reference this |
+| `label` | Yes | Display name (first letter shown in the avatar circle) |
+
+```json
+{ "id": "api", "label": "API Server" }
+```
+
+## Messages
+
+Messages are arrows between actors. They appear top-to-bottom in the order you list them.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `from` | Yes | Source actor `id` |
+| `to` | Yes | Target actor `id` |
+| `label` | No | Text on the arrow |
+| `reply` | No | `true` for a dashed return arrow (use for responses) |
+
+### Requests vs Replies
+
+Use solid arrows for requests and `"reply": true` for responses:
+
+```json
+{ "from": "client", "to": "server", "label": "GET /users" }
+{ "from": "server", "to": "client", "label": "200 OK", "reply": true }
+```
+
+## More Examples
+
+### OAuth Flow
+
+```json
+{
+  "type": "sequence",
+  "actors": [
+    { "id": "app", "label": "App" },
+    { "id": "oauth", "label": "OAuth Provider" },
+    { "id": "api", "label": "Resource API" }
+  ],
+  "messages": [
+    { "from": "app", "to": "oauth", "label": "Redirect to login" },
+    { "from": "oauth", "to": "app", "label": "Authorization code", "reply": true },
+    { "from": "app", "to": "oauth", "label": "Exchange code for token" },
+    { "from": "oauth", "to": "app", "label": "Access token", "reply": true },
+    { "from": "app", "to": "api", "label": "GET /data (Bearer token)" },
+    { "from": "api", "to": "app", "label": "200 JSON payload", "reply": true }
+  ]
+}
+```
+
+### Webhook Delivery
+
+```json
+{
+  "type": "sequence",
+  "actors": [
+    { "id": "service", "label": "Service" },
+    { "id": "queue", "label": "Queue" },
+    { "id": "worker", "label": "Worker" },
+    { "id": "endpoint", "label": "Webhook URL" }
+  ],
+  "messages": [
+    { "from": "service", "to": "queue", "label": "Enqueue event" },
+    { "from": "queue", "to": "worker", "label": "Dequeue" },
+    { "from": "worker", "to": "endpoint", "label": "POST /webhook" },
+    { "from": "endpoint", "to": "worker", "label": "200 OK", "reply": true },
+    { "from": "worker", "to": "queue", "label": "Ack", "reply": true }
+  ]
+}
+```

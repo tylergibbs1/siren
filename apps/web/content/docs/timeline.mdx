@@ -1,0 +1,89 @@
+---
+title: Timeline
+description: Complete syntax reference for Siren timeline diagrams.
+---
+
+Timeline diagrams show events in chronological order. Use them for project milestones, historical events, or release schedules.
+
+## Minimal Example
+
+```json
+{
+  "type": "timeline",
+  "events": [
+    { "id": "a", "date": "2024-01", "label": "Project kickoff" },
+    { "id": "b", "date": "2024-03", "label": "Beta launch" },
+    { "id": "c", "date": "2024-06", "label": "GA release" }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "timeline",
+  "events": [
+    { "id": "plan", "date": "2024 Q1", "label": "Planning", "description": "Define requirements and architecture", "variant": "primary" },
+    { "id": "alpha", "date": "2024 Q2", "label": "Alpha", "description": "Internal testing begins", "variant": "warning" },
+    { "id": "beta", "date": "2024 Q3", "label": "Beta", "description": "Public beta with early adopters", "variant": "primary" },
+    { "id": "rc", "date": "2024 Q4", "label": "Release Candidate", "description": "Feature freeze, bug fixes only", "variant": "warning" },
+    { "id": "ga", "date": "2025 Q1", "label": "General Availability", "description": "Production-ready release", "variant": "success" }
+  ]
+}
+```
+
+## Events
+
+Events are displayed in the order you list them.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier |
+| `date` | Yes | Date label (freeform string — e.g., `"2024-01"`, `"Q3 2024"`, `"March"`) |
+| `label` | Yes | Short title for the event |
+| `description` | No | Longer description shown below the label |
+| `variant` | No | `"default"`, `"primary"`, `"success"`, `"warning"`, or `"danger"` |
+
+### Variants
+
+Variants set the color of each event marker:
+
+| Variant | Use for |
+| --- | --- |
+| `"default"` | Regular events (gray) |
+| `"primary"` | Key milestones (blue) |
+| `"success"` | Completed or positive events (green) |
+| `"warning"` | Caution or pending items (yellow) |
+| `"danger"` | Problems, blockers, or incidents (red) |
+
+## More Examples
+
+### Incident Timeline
+
+```json
+{
+  "type": "timeline",
+  "events": [
+    { "id": "detect", "date": "14:23", "label": "Alert triggered", "description": "CPU usage exceeded 95% on prod-web-03", "variant": "danger" },
+    { "id": "ack", "date": "14:25", "label": "Acknowledged", "description": "On-call engineer paged", "variant": "warning" },
+    { "id": "root", "date": "14:40", "label": "Root cause identified", "description": "Memory leak in connection pool", "variant": "primary" },
+    { "id": "fix", "date": "15:02", "label": "Fix deployed", "description": "Rolled out patched build v2.4.1", "variant": "success" },
+    { "id": "resolve", "date": "15:15", "label": "Resolved", "description": "All metrics back to normal", "variant": "success" }
+  ]
+}
+```
+
+### Product Roadmap
+
+```json
+{
+  "type": "timeline",
+  "events": [
+    { "id": "mvp", "date": "Jan 2024", "label": "MVP", "description": "Core editor and export", "variant": "success" },
+    { "id": "collab", "date": "Mar 2024", "label": "Collaboration", "description": "Real-time multiplayer editing", "variant": "success" },
+    { "id": "plugins", "date": "Jun 2024", "label": "Plugin API", "description": "Third-party extensions", "variant": "primary" },
+    { "id": "enterprise", "date": "Sep 2024", "label": "Enterprise", "description": "SSO, audit logs, SLA", "variant": "primary" }
+  ]
+}
+```

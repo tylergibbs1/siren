@@ -1,0 +1,173 @@
+---
+title: Class Diagram
+description: Complete syntax reference for Siren class diagrams.
+---
+
+Class diagrams show object-oriented structures — classes, their attributes and methods, and the relationships between them.
+
+## Minimal Example
+
+```json
+{
+  "type": "class",
+  "classes": [
+    { "id": "animal", "name": "Animal", "methods": ["speak()"] },
+    { "id": "dog", "name": "Dog", "methods": ["speak()"] }
+  ],
+  "relationships": [
+    { "from": "dog", "to": "animal", "type": "inheritance" }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "class",
+  "classes": [
+    {
+      "id": "user",
+      "name": "User",
+      "attributes": ["id: string", "email: string", "name: string"],
+      "methods": ["updateProfile()", "changePassword()"]
+    },
+    {
+      "id": "order",
+      "name": "Order",
+      "attributes": ["id: string", "total: number", "status: string"],
+      "methods": ["cancel()", "refund()"]
+    },
+    {
+      "id": "lineItem",
+      "name": "LineItem",
+      "attributes": ["productId: string", "quantity: number", "price: number"]
+    },
+    {
+      "id": "payment",
+      "name": "PaymentProcessor",
+      "methods": ["charge(amount)", "refund(transactionId)"]
+    }
+  ],
+  "relationships": [
+    { "from": "user", "to": "order", "type": "association", "label": "places" },
+    { "from": "order", "to": "lineItem", "type": "composition", "label": "contains" },
+    { "from": "order", "to": "payment", "type": "dependency", "label": "uses" }
+  ]
+}
+```
+
+## Classes
+
+Each class needs a unique `id` and a `name`.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier — relationships reference this |
+| `name` | Yes | Display name shown in the class header |
+| `attributes` | No | Array of attribute strings (e.g., `"name: string"`) |
+| `methods` | No | Array of method strings (e.g., `"save()"`) |
+
+```json
+{
+  "id": "product",
+  "name": "Product",
+  "attributes": ["id: string", "price: number"],
+  "methods": ["applyDiscount(percent)"]
+}
+```
+
+## Relationships
+
+Each relationship connects two classes by their `id`.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `from` | Yes | Source class `id` |
+| `to` | Yes | Target class `id` |
+| `type` | Yes | Relationship type (see below) |
+| `label` | No | Text on the connector |
+
+### Relationship Types
+
+| Type | Arrow | Use for |
+| --- | --- | --- |
+| `"inheritance"` | Solid with hollow triangle | "is a" (extends) |
+| `"realization"` | Dashed with hollow triangle | "implements" (interface) |
+| `"composition"` | Solid with filled diamond | "owns" (lifecycle-bound) |
+| `"aggregation"` | Solid with hollow diamond | "has" (independent lifecycle) |
+| `"association"` | Solid line | General "uses" or "knows about" |
+| `"dependency"` | Dashed line | Weak "depends on" |
+
+## More Examples
+
+### Repository Pattern
+
+```json
+{
+  "type": "class",
+  "classes": [
+    {
+      "id": "repo",
+      "name": "UserRepository",
+      "methods": ["findById(id)", "save(user)", "delete(id)"]
+    },
+    {
+      "id": "iRepo",
+      "name": "IRepository",
+      "methods": ["findById(id)", "save(entity)", "delete(id)"]
+    },
+    {
+      "id": "entity",
+      "name": "User",
+      "attributes": ["id: string", "email: string"]
+    },
+    {
+      "id": "db",
+      "name": "Database",
+      "methods": ["query(sql)"]
+    }
+  ],
+  "relationships": [
+    { "from": "repo", "to": "iRepo", "type": "realization" },
+    { "from": "repo", "to": "entity", "type": "association", "label": "manages" },
+    { "from": "repo", "to": "db", "type": "dependency", "label": "queries" }
+  ]
+}
+```
+
+### Observer Pattern
+
+```json
+{
+  "type": "class",
+  "classes": [
+    {
+      "id": "subject",
+      "name": "EventEmitter",
+      "attributes": ["listeners: Map"],
+      "methods": ["on(event, fn)", "emit(event, data)"]
+    },
+    {
+      "id": "observer",
+      "name": "Observer",
+      "methods": ["update(data)"]
+    },
+    {
+      "id": "logger",
+      "name": "Logger",
+      "methods": ["update(data)"]
+    },
+    {
+      "id": "metrics",
+      "name": "MetricsCollector",
+      "methods": ["update(data)"]
+    }
+  ],
+  "relationships": [
+    { "from": "subject", "to": "observer", "type": "aggregation", "label": "notifies" },
+    { "from": "logger", "to": "observer", "type": "realization" },
+    { "from": "metrics", "to": "observer", "type": "realization" }
+  ]
+}
+```

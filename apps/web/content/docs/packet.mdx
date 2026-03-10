@@ -1,0 +1,174 @@
+---
+title: Packet Diagram
+description: Complete syntax reference for Siren packet diagrams.
+---
+
+Packet diagrams show binary protocol structures with labeled bit fields. Use them for network protocol documentation, file format specs, or hardware register layouts.
+
+## Minimal Example
+
+```json
+{
+  "type": "packet",
+  "rows": [
+    {
+      "fields": [
+        { "label": "Header", "bits": 16 },
+        { "label": "Payload", "bits": 16 }
+      ]
+    }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "packet",
+  "title": "TCP Header",
+  "wordSize": 32,
+  "rows": [
+    {
+      "fields": [
+        { "label": "Source Port", "bits": 16 },
+        { "label": "Destination Port", "bits": 16 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "Sequence Number", "bits": 32 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "Acknowledgment Number", "bits": 32 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "Data Offset", "bits": 4 },
+        { "label": "Reserved", "bits": 3 },
+        { "label": "Flags", "bits": 9 },
+        { "label": "Window Size", "bits": 16 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "Checksum", "bits": 16 },
+        { "label": "Urgent Pointer", "bits": 16 }
+      ]
+    }
+  ]
+}
+```
+
+## Top-Level Fields
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `type` | Yes | Must be `"packet"` |
+| `title` | No | Diagram title |
+| `wordSize` | No | Bits per row (default `32`) |
+| `rows` | Yes | Array of row objects |
+
+## Rows
+
+Each row represents one word-width of the packet.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `fields` | Yes | Array of field objects (bits should sum to `wordSize`) |
+
+## Fields
+
+Each field is a labeled segment within a row.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `label` | Yes | Field name |
+| `bits` | Yes | Width in bits |
+
+```json
+{ "label": "Source Port", "bits": 16 }
+```
+
+## More Examples
+
+### IPv4 Header
+
+```json
+{
+  "type": "packet",
+  "title": "IPv4 Header",
+  "wordSize": 32,
+  "rows": [
+    {
+      "fields": [
+        { "label": "Version", "bits": 4 },
+        { "label": "IHL", "bits": 4 },
+        { "label": "DSCP", "bits": 6 },
+        { "label": "ECN", "bits": 2 },
+        { "label": "Total Length", "bits": 16 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "Identification", "bits": 16 },
+        { "label": "Flags", "bits": 3 },
+        { "label": "Fragment Offset", "bits": 13 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "TTL", "bits": 8 },
+        { "label": "Protocol", "bits": 8 },
+        { "label": "Header Checksum", "bits": 16 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "Source Address", "bits": 32 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "Destination Address", "bits": 32 }
+      ]
+    }
+  ]
+}
+```
+
+### USB Setup Packet
+
+```json
+{
+  "type": "packet",
+  "title": "USB Setup Packet",
+  "wordSize": 16,
+  "rows": [
+    {
+      "fields": [
+        { "label": "bmRequestType", "bits": 8 },
+        { "label": "bRequest", "bits": 8 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "wValue", "bits": 16 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "wIndex", "bits": 16 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "wLength", "bits": 16 }
+      ]
+    }
+  ]
+}
+```

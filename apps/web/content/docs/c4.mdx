@@ -1,0 +1,131 @@
+---
+title: C4 Diagram
+description: Complete syntax reference for Siren C4 architecture diagrams.
+---
+
+C4 diagrams show software architecture at different levels of abstraction — people, systems, and boundaries. Based on the C4 model by Simon Brown.
+
+## Minimal Example
+
+```json
+{
+  "type": "c4",
+  "elements": [
+    { "id": "user", "label": "User", "type": "person" },
+    { "id": "app", "label": "Web App", "type": "system" }
+  ],
+  "relationships": [
+    { "from": "user", "to": "app", "label": "Uses" }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "c4",
+  "elements": [
+    { "id": "customer", "label": "Customer", "type": "person", "description": "A customer of the bank" },
+    {
+      "id": "banking",
+      "label": "Internet Banking System",
+      "type": "boundary",
+      "children": [
+        { "id": "webapp", "label": "Web Application", "type": "system", "description": "Serves the single-page app" },
+        { "id": "api", "label": "API Server", "type": "system", "description": "Handles business logic and data access" },
+        { "id": "db", "label": "Database", "type": "system", "description": "Stores user accounts and transactions" }
+      ]
+    },
+    { "id": "email", "label": "Email System", "type": "system", "description": "Sends transactional emails" }
+  ],
+  "relationships": [
+    { "from": "customer", "to": "webapp", "label": "Views account" },
+    { "from": "webapp", "to": "api", "label": "REST/JSON" },
+    { "from": "api", "to": "db", "label": "Reads/writes" },
+    { "from": "api", "to": "email", "label": "Sends notifications" }
+  ]
+}
+```
+
+## Elements
+
+Each element represents a person, system, or boundary container.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier — relationships reference this |
+| `label` | Yes | Display name |
+| `type` | Yes | `"person"`, `"system"`, or `"boundary"` |
+| `description` | No | Short description shown below the label |
+| `children` | No | Nested elements (only valid for `"boundary"` type) |
+
+### Element Types
+
+| Type | Visual | Use for |
+| --- | --- | --- |
+| `"person"` | Person figure | Users, actors, roles |
+| `"system"` | Box | Applications, services, databases |
+| `"boundary"` | Dashed container | Logical groupings, trust boundaries |
+
+### Boundaries
+
+Boundaries group related systems. Use the `children` array to nest elements:
+
+```json
+{
+  "id": "backend",
+  "label": "Backend Services",
+  "type": "boundary",
+  "children": [
+    { "id": "api", "label": "API", "type": "system" },
+    { "id": "worker", "label": "Worker", "type": "system" }
+  ]
+}
+```
+
+## Relationships
+
+Each relationship connects two elements.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `from` | Yes | Source element `id` |
+| `to` | Yes | Target element `id` |
+| `label` | No | Description of the interaction |
+
+## More Examples
+
+### E-Commerce Platform
+
+```json
+{
+  "type": "c4",
+  "elements": [
+    { "id": "shopper", "label": "Shopper", "type": "person", "description": "Browses and buys products" },
+    { "id": "admin", "label": "Admin", "type": "person", "description": "Manages catalog and orders" },
+    {
+      "id": "platform",
+      "label": "E-Commerce Platform",
+      "type": "boundary",
+      "children": [
+        { "id": "storefront", "label": "Storefront", "type": "system", "description": "Next.js web app" },
+        { "id": "api", "label": "API Gateway", "type": "system", "description": "Routes requests to services" },
+        { "id": "catalog", "label": "Catalog Service", "type": "system", "description": "Product data and search" },
+        { "id": "orders", "label": "Order Service", "type": "system", "description": "Order processing and fulfillment" }
+      ]
+    },
+    { "id": "payments", "label": "Stripe", "type": "system", "description": "Payment processing" },
+    { "id": "shipping", "label": "Shipping Provider", "type": "system", "description": "Delivery tracking" }
+  ],
+  "relationships": [
+    { "from": "shopper", "to": "storefront", "label": "Browses products" },
+    { "from": "admin", "to": "api", "label": "Manages catalog" },
+    { "from": "storefront", "to": "api", "label": "API calls" },
+    { "from": "api", "to": "catalog", "label": "Product queries" },
+    { "from": "api", "to": "orders", "label": "Place/view orders" },
+    { "from": "orders", "to": "payments", "label": "Charge card" },
+    { "from": "orders", "to": "shipping", "label": "Create shipment" }
+  ]
+}
+```

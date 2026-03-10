@@ -1,0 +1,105 @@
+---
+title: Quadrant Chart
+description: Complete syntax reference for Siren quadrant chart diagrams.
+---
+
+Quadrant charts position items on a 2D grid divided into four regions. Use them for prioritization matrices, competitive analysis, or risk assessments.
+
+## Minimal Example
+
+```json
+{
+  "type": "quadrant",
+  "items": [
+    { "id": "a", "label": "Feature A", "x": 0.8, "y": 0.9 },
+    { "id": "b", "label": "Feature B", "x": 0.2, "y": 0.7 },
+    { "id": "c", "label": "Feature C", "x": 0.6, "y": 0.3 }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "quadrant",
+  "title": "Effort vs Impact",
+  "xLabel": "Effort",
+  "yLabel": "Impact",
+  "quadrants": ["Quick Wins", "Major Projects", "Fill-Ins", "Thankless Tasks"],
+  "items": [
+    { "id": "cache", "label": "Add caching", "x": 0.2, "y": 0.9 },
+    { "id": "rewrite", "label": "Full rewrite", "x": 0.9, "y": 0.8 },
+    { "id": "typos", "label": "Fix typos", "x": 0.1, "y": 0.2 },
+    { "id": "migrate", "label": "DB migration", "x": 0.8, "y": 0.3 },
+    { "id": "search", "label": "Search feature", "x": 0.5, "y": 0.7 },
+    { "id": "docs", "label": "Update docs", "x": 0.3, "y": 0.5 }
+  ]
+}
+```
+
+## Top-Level Fields
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `type` | Yes | Must be `"quadrant"` |
+| `title` | No | Chart title |
+| `xLabel` | No | Label for the horizontal axis |
+| `yLabel` | No | Label for the vertical axis |
+| `quadrants` | No | Array of 4 labels for each quadrant (top-left, top-right, bottom-left, bottom-right) |
+| `items` | Yes | Array of item objects |
+
+## Items
+
+Each item is a point on the chart.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier |
+| `label` | Yes | Display label |
+| `x` | Yes | Horizontal position from `0.0` (left) to `1.0` (right) |
+| `y` | Yes | Vertical position from `0.0` (bottom) to `1.0` (top) |
+
+```json
+{ "id": "item1", "label": "Add caching", "x": 0.2, "y": 0.9 }
+```
+
+## More Examples
+
+### Risk Assessment
+
+```json
+{
+  "type": "quadrant",
+  "title": "Risk Matrix",
+  "xLabel": "Likelihood",
+  "yLabel": "Severity",
+  "quadrants": ["Monitor", "Critical", "Low Priority", "Mitigate"],
+  "items": [
+    { "id": "r1", "label": "Data breach", "x": 0.3, "y": 0.95 },
+    { "id": "r2", "label": "Server outage", "x": 0.6, "y": 0.8 },
+    { "id": "r3", "label": "Dependency EOL", "x": 0.7, "y": 0.4 },
+    { "id": "r4", "label": "Minor UI bug", "x": 0.8, "y": 0.1 },
+    { "id": "r5", "label": "Vendor lock-in", "x": 0.4, "y": 0.5 }
+  ]
+}
+```
+
+### Technology Radar
+
+```json
+{
+  "type": "quadrant",
+  "title": "Tech Evaluation",
+  "xLabel": "Team Familiarity",
+  "yLabel": "Business Value",
+  "quadrants": ["Invest", "Adopt Now", "Explore Later", "Strong Foundation"],
+  "items": [
+    { "id": "t1", "label": "Kubernetes", "x": 0.4, "y": 0.8 },
+    { "id": "t2", "label": "React", "x": 0.9, "y": 0.7 },
+    { "id": "t3", "label": "Rust", "x": 0.2, "y": 0.5 },
+    { "id": "t4", "label": "PostgreSQL", "x": 0.95, "y": 0.6 },
+    { "id": "t5", "label": "WASM", "x": 0.1, "y": 0.3 }
+  ]
+}
+```

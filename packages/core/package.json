@@ -11,14 +11,15 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
-    "test": "bun test",
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist .turbo"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "elkjs": "^0.9.3"
   },
   "devDependencies": {
-    "tsup": "^8.3.0",
-    "typescript": "^5.7.0"
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.2"
   }
 }

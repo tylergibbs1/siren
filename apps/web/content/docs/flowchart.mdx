@@ -1,0 +1,182 @@
+---
+title: Flowchart
+description: Complete syntax reference for Siren flowchart diagrams.
+---
+
+Flowcharts show processes, decision trees, and step-by-step pipelines. Nodes are positioned automatically using the ELK layout engine.
+
+## Minimal Example
+
+```json
+{
+  "type": "flowchart",
+  "nodes": [
+    { "id": "a", "label": "Start" },
+    { "id": "b", "label": "End" }
+  ],
+  "edges": [
+    { "from": "a", "to": "b" }
+  ]
+}
+```
+
+## Full Example
+
+```json
+{
+  "type": "flowchart",
+  "direction": "TB",
+  "nodes": [
+    { "id": "start", "label": "User signs up", "variant": "primary" },
+    { "id": "verify", "label": "Email verified?", "shape": "diamond" },
+    { "id": "onboard", "label": "Onboarding", "variant": "success" },
+    { "id": "remind", "label": "Send reminder", "variant": "warning" },
+    { "id": "active", "label": "Active user", "variant": "success" }
+  ],
+  "edges": [
+    { "from": "start", "to": "verify" },
+    { "from": "verify", "to": "onboard", "label": "yes" },
+    { "from": "verify", "to": "remind", "label": "no" },
+    { "from": "remind", "to": "verify", "dashed": true },
+    { "from": "onboard", "to": "active" }
+  ]
+}
+```
+
+## Direction
+
+Controls which way the diagram flows. Set at the top level.
+
+| Value | Meaning |
+| --- | --- |
+| `"TB"` | Top to bottom (default) |
+| `"BT"` | Bottom to top |
+| `"LR"` | Left to right |
+| `"RL"` | Right to left |
+
+```json
+{
+  "type": "flowchart",
+  "direction": "LR",
+  "nodes": [...],
+  "edges": [...]
+}
+```
+
+## Nodes
+
+Each node needs a unique `id` and a `label`.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `id` | Yes | Unique identifier — edges reference this |
+| `label` | Yes | Text displayed in the node |
+| `shape` | No | `"rounded"` (default), `"rectangle"`, or `"diamond"` |
+| `variant` | No | `"default"`, `"primary"`, `"success"`, `"warning"`, or `"danger"` |
+
+### Shapes
+
+- **`"rounded"`** — Default rectangle with rounded corners. Use for regular steps.
+- **`"rectangle"`** — Sharp-cornered rectangle.
+- **`"diamond"`** — Diamond shape. Use for yes/no decisions.
+
+```json
+{ "id": "check", "label": "Is it valid?", "shape": "diamond" }
+```
+
+### Variants
+
+Variants set the color of a node:
+
+| Variant | Use for |
+| --- | --- |
+| `"default"` | Regular steps (gray) |
+| `"primary"` | Starting points, key actions (blue) |
+| `"success"` | Completed states, happy paths (green) |
+| `"warning"` | Caution, retry loops (yellow) |
+| `"danger"` | Errors, failures, destructive actions (red) |
+
+```json
+{ "id": "err", "label": "Request failed", "variant": "danger" }
+```
+
+## Edges
+
+Each edge connects two nodes by their `id`.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `from` | Yes | Source node `id` |
+| `to` | Yes | Target node `id` |
+| `label` | No | Text on the arrow (e.g., `"yes"`, `"no"`, `"retry"`) |
+| `dashed` | No | `true` for a dashed line (use for optional/fallback paths) |
+| `animated` | No | `true` for a moving dash animation |
+
+### Labeled Edges
+
+Use labels on edges coming out of decision nodes:
+
+```json
+{ "from": "check", "to": "success", "label": "yes" }
+{ "from": "check", "to": "fail", "label": "no" }
+```
+
+### Dashed Edges
+
+Use dashed edges for retry loops, fallbacks, or optional paths:
+
+```json
+{ "from": "retry", "to": "start", "dashed": true }
+```
+
+## More Examples
+
+### CI/CD Pipeline (left-to-right)
+
+```json
+{
+  "type": "flowchart",
+  "direction": "LR",
+  "nodes": [
+    { "id": "commit", "label": "Git Push" },
+    { "id": "build", "label": "Build", "variant": "primary" },
+    { "id": "test", "label": "Tests", "variant": "primary" },
+    { "id": "check", "label": "Pass?", "shape": "diamond" },
+    { "id": "deploy", "label": "Deploy", "variant": "success" },
+    { "id": "fix", "label": "Fix", "variant": "danger" }
+  ],
+  "edges": [
+    { "from": "commit", "to": "build" },
+    { "from": "build", "to": "test" },
+    { "from": "test", "to": "check" },
+    { "from": "check", "to": "deploy", "label": "yes" },
+    { "from": "check", "to": "fix", "label": "no" },
+    { "from": "fix", "to": "commit", "dashed": true }
+  ]
+}
+```
+
+### Error Handling
+
+```json
+{
+  "type": "flowchart",
+  "direction": "TB",
+  "nodes": [
+    { "id": "req", "label": "API Request", "variant": "primary" },
+    { "id": "ok", "label": "200 OK?", "shape": "diamond" },
+    { "id": "parse", "label": "Parse Response", "variant": "success" },
+    { "id": "retry", "label": "Retries left?", "shape": "diamond" },
+    { "id": "wait", "label": "Wait & Retry", "variant": "warning" },
+    { "id": "fail", "label": "Give Up", "variant": "danger" }
+  ],
+  "edges": [
+    { "from": "req", "to": "ok" },
+    { "from": "ok", "to": "parse", "label": "yes" },
+    { "from": "ok", "to": "retry", "label": "no" },
+    { "from": "retry", "to": "wait", "label": "yes" },
+    { "from": "retry", "to": "fail", "label": "no" },
+    { "from": "wait", "to": "req", "dashed": true }
+  ]
+}
+```

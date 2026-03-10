@@ -1,0 +1,53 @@
+---
+title: Getting Started
+description: Learn the Siren JSON syntax to create diagrams in the playground.
+---
+
+Siren uses JSON to describe diagrams. Write JSON in the editor, and the diagram renders live in the preview panel.
+
+## Supported Diagram Types
+
+| Type | Description |
+| --- | --- |
+| [Flowchart](/docs/flowchart) | Process flows, decision trees, pipelines |
+| [Sequence](/docs/sequence) | API calls, service communication, request/response patterns |
+
+## Basic Structure
+
+Every Siren diagram is a JSON object with a `type` field that determines the diagram kind:
+
+```json
+{
+  "type": "flowchart",
+  ...
+}
+```
+
+```json
+{
+  "type": "sequence",
+  ...
+}
+```
+
+## Your First Diagram
+
+Paste this into the [Playground](/) editor:
+
+```json
+{
+  "type": "flowchart",
+  "direction": "TB",
+  "nodes": [
+    { "id": "a", "label": "Start", "variant": "primary" },
+    { "id": "b", "label": "Do something" },
+    { "id": "c", "label": "Done", "variant": "success" }
+  ],
+  "edges": [
+    { "from": "a", "to": "b" },
+    { "from": "b", "to": "c" }
+  ]
+}
+```
+
+Nodes are the boxes. Edges are the arrows between them. Siren handles all the layout automatically.
