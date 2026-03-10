@@ -39,3 +39,16 @@ export { themes, type ThemeName } from '@siren/themes'
 
 // fromJSON: convert a DiagramDefinition to React elements
 export { fromJSON } from './fromJSON'
+
+// Export utilities
+export {
+  exportSVG,
+  exportPNG,
+  exportJSON,
+  downloadBlob,
+  downloadSVG,
+  downloadJSON,
+  copyToClipboard,
+  type ExportOptions,
+  type ExportPNGOptions,
+} from './export'
