@@ -6,6 +6,7 @@
     "json-schema",
     "render-from-json",
     "theming",
+    "best-practices",
     "---Diagram Types---",
     "flowchart",
     "sequence",

@@ -1,0 +1,240 @@
+---
+title: Best Practices
+description: Tips for creating clear, effective diagrams with Siren.
+---
+
+Quick reference for when to use each diagram type, how to get the best results, and what to avoid.
+
+---
+
+## Flowchart
+
+**Use for:** Processes, workflows, and decision logic.
+
+- Keep to **15 or fewer nodes**; break larger processes into sub-flowcharts.
+- Use shapes consistently: `rounded` for steps, `diamond` for decisions.
+- Flow in one direction — `TB` or `LR`, never mixed.
+- Label every decision branch (`"Yes"` / `"No"`) so paths are unambiguous.
+- Use a single start and ideally a single end point.
+
+**Avoid:** Cramming an entire multi-page process into one chart. Omitting decision labels.
+
+---
+
+## Sequence Diagram
+
+**Use for:** Showing how actors interact over time through ordered messages.
+
+- Limit to **5–7 participants**; extract sub-interactions into separate diagrams.
+- Order participants left-to-right in the most common call direction to minimize crossing arrows.
+- Label every message with a verb phrase (e.g., `"POST /login"`, `"validate credentials"`).
+- Use `reply: true` for return messages so the reader sees the full round-trip.
+
+**Avoid:** Including every low-level method call. Not showing return messages.
+
+---
+
+## State Diagram
+
+**Use for:** Modeling the lifecycle of a single entity (e.g., an Order, a Connection).
+
+- Focus on **one entity per diagram**.
+- Label every transition with the event that causes it.
+- Use `guard` for conditional transitions (e.g., `"[payment valid]"`).
+- Keep to **7–12 states**; always define `initial` and `final` states.
+- Name states as conditions ("Idle", "Processing"), not actions ("Process Order").
+
+**Avoid:** Dead-end states with no exit transition. Modeling multiple entities in one diagram.
+
+---
+
+## Class Diagram
+
+**Use for:** Static structure — classes, attributes, methods, and relationships.
+
+- Show only the classes relevant to the topic — a diagram with **20+ classes loses its value**.
+- Always label relationship types and use the correct one (inheritance, composition, dependency, etc.).
+- Place parent classes above children so inheritance reads top-to-bottom.
+- Hide trivial getters/setters; show only domain-significant methods.
+
+**Avoid:** Trying to show every class in the codebase. Confusing aggregation with composition.
+
+---
+
+## Entity-Relationship (ER)
+
+**Use for:** Database schema — entities, columns, and relationships.
+
+- Name entities as **singular nouns** (Customer, not Customers).
+- Always specify cardinality (`1:1`, `1:N`, `M:N`) on every relationship.
+- Mark primary keys (`pk: true`) and foreign keys (`fk: true`) explicitly.
+- Keep to **10–15 entities** per diagram; split by bounded context for larger schemas.
+- Add `label` to relationships with a verb phrase (e.g., `"places"`, `"contains"`).
+
+**Avoid:** Omitting cardinality. Showing every audit column when the goal is conceptual understanding.
+
+---
+
+## Pie Chart
+
+**Use for:** Parts-of-a-whole composition when you have **2–5 categories** that sum to 100%.
+
+- No more than **5–6 slices**; group small values into "Other".
+- Label each segment with the category name and value directly.
+- Use distinct, colorblind-safe colors.
+
+**Avoid:** More than 6 categories (slices become indistinguishable). Using pie charts to compare values over time — use a different chart type.
+
+---
+
+## Gantt Chart
+
+**Use for:** Project schedules — tasks, durations, and dependencies over time.
+
+- Group tasks into **logical sections** (phases, sprints, milestones).
+- Keep task granularity consistent — don't mix 1-hour tasks with 3-month tasks.
+- Use `milestone: true` for key dates rather than zero-duration bars.
+- Show a reasonable number of tasks; summarize or filter if you have 50+.
+
+**Avoid:** Overloading with 100+ tasks. Omitting sections, which turns the chart into a flat list.
+
+---
+
+## Timeline
+
+**Use for:** Chronological events or milestones along a linear axis.
+
+- Keep to **10–20 events**.
+- Use consistent date formatting throughout.
+- Add brief descriptions (5–10 words), not just dates.
+- Use `variant` to highlight critical events (e.g., `"danger"` for incidents, `"success"` for launches).
+
+**Avoid:** Overcrowding with too many events. Events with no description — just a date is not enough context.
+
+---
+
+## Kanban Board
+
+**Use for:** Visualizing work-in-progress across workflow stages.
+
+- Limit to **3–6 columns** that reflect your actual workflow.
+- Keep card titles short and actionable (start with a verb).
+- Use `tags` to indicate priority, type, or assignee.
+- Order cards within a column by priority (highest first).
+
+**Avoid:** Too many columns that mirror a waterfall process. Vague card titles like "Fix thing".
+
+---
+
+## Quadrant Chart
+
+**Use for:** Classifying items along two dimensions (e.g., effort vs. impact).
+
+- Label **both axes** and **all four quadrants** with clear, meaningful names.
+- Plot no more than **15–20 items**.
+- Use consistent scales so quadrant boundaries are meaningful.
+- Place `x` and `y` values between 0 and 1 for normalized comparison.
+
+**Avoid:** Vague or unlabeled axes. Placing axis thresholds arbitrarily instead of at meaningful breakpoints.
+
+---
+
+## Sankey Diagram
+
+**Use for:** Flow and quantity of resources between stages, where width represents magnitude.
+
+- Order nodes logically from source (left) to destination (right).
+- Label flows with their `value` so the reader can see actual quantities.
+- Keep to **5–7 stages** and no more than **15–20 nodes**.
+
+**Avoid:** Too many crisscrossing flows ("spaghetti"). Omitting numeric values — width alone is hard to read precisely.
+
+---
+
+## C4 Diagram
+
+**Use for:** Software architecture at multiple abstraction levels (Context, Container, Component).
+
+- Start at **System Context** level; only drill down when the audience needs detail.
+- Every element should have a `label` and `description` explaining its responsibility.
+- Show external systems and users as elements with `type: "person"` or separate boundary.
+- Keep each diagram to **5–10 elements**.
+
+**Avoid:** Jumping straight to component-level without establishing context. Omitting descriptions.
+
+---
+
+## Architecture Diagram
+
+**Use for:** High-level system overview — components, boundaries, and infrastructure.
+
+- Use **groups** to separate components by deployment zone, network, or team.
+- Label every connection with its protocol or method (e.g., `"REST"`, `"gRPC"`, `"WebSocket"`).
+- Target one audience per diagram — don't mix infrastructure and code-level detail.
+- Keep to **10–15 services**.
+
+**Avoid:** Mixing abstraction levels. Unlabeled arrows between services.
+
+---
+
+## Block Diagram
+
+**Use for:** High-level functional components and how they connect, without implementation detail.
+
+- Use **uniform block structure** and consistent naming.
+- Label connections to show what data or signals flow between blocks.
+- Keep to **8–15 blocks**; use nested `children` to create hierarchy if needed.
+- Arrange blocks to minimize crossing lines.
+
+**Avoid:** Making blocks different sizes for no semantic reason. Omitting flow direction.
+
+---
+
+## Mindmap
+
+**Use for:** Brainstorming, organizing ideas, or showing hierarchical relationships from a central concept.
+
+- Place one main topic at the root; limit to **5–7 primary branches**.
+- Keep labels to **1–3 words** per node.
+- Limit depth to **3–4 levels**; deeper nesting becomes hard to follow.
+
+**Avoid:** Full sentences at every node — a mindmap is not an outline. More than 7 top-level branches.
+
+---
+
+## Git Graph
+
+**Use for:** Visualizing branching strategies, release workflows, or explaining a specific Git history.
+
+- Show only the branches relevant to the story — omit trivial branches.
+- Label key commits with meaningful messages; skip routine ones.
+- Use `merge: true` to indicate integration points.
+- Keep time flowing in one direction consistently.
+
+**Avoid:** Including every commit from a real repo. Unlabeled branches.
+
+---
+
+## Requirement Diagram
+
+**Use for:** Traceability — requirements linked to designs, tests, and other requirements.
+
+- Give every requirement a unique `id` and clear `label`.
+- Use specific relationship types: `derives`, `satisfies`, `verifies`, `refines`, `traces`.
+- Keep to **10–15 requirements** per diagram; split by subsystem for large projects.
+- Link every requirement to at least one verification element to show coverage.
+
+**Avoid:** Requirements in isolation without traceability links. Vague labels like "System shall be fast".
+
+---
+
+## Packet Diagram
+
+**Use for:** Binary protocol structure — field layout with bit/byte offsets.
+
+- Show fields in transmission order with `bits` clearly specified.
+- Label every field with its name and size.
+- Set `wordSize` to match the protocol (typically `32` for IP, `8` for USB).
+- Highlight variable-length or optional fields distinctly.
+
+**Avoid:** Unlabeled field sizes. Drawing fields out of the protocol's actual order.
