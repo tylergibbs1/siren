@@ -36,3 +36,23 @@ export const EDGE_LABEL_BG_STYLE = {
   ry: 4,
 };
 export const PRO_OPTIONS = { hideAttribution: true };
+
+/**
+ * Maps layout direction to source/target handle positions.
+ * TB: target=Top, source=Bottom
+ * BT: target=Bottom, source=Top
+ * LR: target=Left, source=Right
+ * RL: target=Right, source=Left
+ */
+import { Position } from "@xyflow/react";
+
+const DIRECTION_HANDLES: Record<string, { source: Position; target: Position }> = {
+  TB: { target: Position.Top, source: Position.Bottom },
+  BT: { target: Position.Bottom, source: Position.Top },
+  LR: { target: Position.Left, source: Position.Right },
+  RL: { target: Position.Right, source: Position.Left },
+};
+
+export function getHandlePositions(direction?: string) {
+  return DIRECTION_HANDLES[direction ?? "TB"] ?? DIRECTION_HANDLES.TB!;
+}

@@ -1,8 +1,8 @@
 "use client";
 
 import { memo } from "react";
-import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
-import { HIDDEN_HANDLE_STYLE } from "../shared/edge-styles";
+import { Handle, type NodeProps, type Node } from "@xyflow/react";
+import { HIDDEN_HANDLE_STYLE, getHandlePositions } from "../shared/edge-styles";
 import { VARIANT_STYLES, BASE_TEXT_STYLE, type StepVariant } from "../shared/variant-styles";
 
 // ── Shared ──────────────────────────────────────────────────────────
@@ -10,6 +10,7 @@ import { VARIANT_STYLES, BASE_TEXT_STYLE, type StepVariant } from "../shared/var
 type ShapeNodeData = {
   label: string;
   variant?: StepVariant;
+  direction?: string;
 };
 
 function useVariant(variant?: StepVariant) {
@@ -22,9 +23,10 @@ export type StadiumNode = Node<ShapeNodeData, "stadium">;
 
 function StadiumComponent({ data }: NodeProps<StadiumNode>) {
   const s = useVariant(data.variant);
+  const handles = getHandlePositions(data.direction);
   return (
     <>
-      <Handle type="target" position={Position.Top} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="target" position={handles.target} style={HIDDEN_HANDLE_STYLE} />
       <div
         style={{
           padding: "12px 28px",
@@ -39,7 +41,7 @@ function StadiumComponent({ data }: NodeProps<StadiumNode>) {
       >
         {data.label}
       </div>
-      <Handle type="source" position={Position.Bottom} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="source" position={handles.source} style={HIDDEN_HANDLE_STYLE} />
     </>
   );
 }
@@ -53,9 +55,10 @@ export type CylinderNode = Node<ShapeNodeData, "cylinder">;
 
 function CylinderComponent({ data }: NodeProps<CylinderNode>) {
   const s = useVariant(data.variant);
+  const handles = getHandlePositions(data.direction);
   return (
     <>
-      <Handle type="target" position={Position.Top} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="target" position={handles.target} style={HIDDEN_HANDLE_STYLE} />
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "120px" }}>
         <svg width="100%" height="100%" viewBox="0 0 120 80" style={{ minWidth: 120, minHeight: 80 }}>
           {/* Body */}
@@ -80,7 +83,7 @@ function CylinderComponent({ data }: NodeProps<CylinderNode>) {
           </text>
         </svg>
       </div>
-      <Handle type="source" position={Position.Bottom} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="source" position={handles.source} style={HIDDEN_HANDLE_STYLE} />
     </>
   );
 }
@@ -94,9 +97,10 @@ export type HexagonNode = Node<ShapeNodeData, "hexagon">;
 
 function HexagonComponent({ data }: NodeProps<HexagonNode>) {
   const s = useVariant(data.variant);
+  const handles = getHandlePositions(data.direction);
   return (
     <>
-      <Handle type="target" position={Position.Top} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="target" position={handles.target} style={HIDDEN_HANDLE_STYLE} />
       <div style={{ position: "relative", minWidth: "140px", minHeight: "50px" }}>
         <svg
           width="100%"
@@ -129,7 +133,7 @@ function HexagonComponent({ data }: NodeProps<HexagonNode>) {
           {data.label}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="source" position={handles.source} style={HIDDEN_HANDLE_STYLE} />
     </>
   );
 }
@@ -143,9 +147,10 @@ export type CloudNode = Node<ShapeNodeData, "cloud">;
 
 function CloudComponent({ data }: NodeProps<CloudNode>) {
   const s = useVariant(data.variant);
+  const handles = getHandlePositions(data.direction);
   return (
     <>
-      <Handle type="target" position={Position.Top} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="target" position={handles.target} style={HIDDEN_HANDLE_STYLE} />
       <div style={{ position: "relative", minWidth: "160px", minHeight: "80px" }}>
         <svg
           width="100%"
@@ -173,7 +178,7 @@ function CloudComponent({ data }: NodeProps<CloudNode>) {
           {data.label}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="source" position={handles.source} style={HIDDEN_HANDLE_STYLE} />
     </>
   );
 }
@@ -187,9 +192,10 @@ export type DocumentNode = Node<ShapeNodeData, "document">;
 
 function DocumentComponent({ data }: NodeProps<DocumentNode>) {
   const s = useVariant(data.variant);
+  const handles = getHandlePositions(data.direction);
   return (
     <>
-      <Handle type="target" position={Position.Top} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="target" position={handles.target} style={HIDDEN_HANDLE_STYLE} />
       <div style={{ position: "relative", minWidth: "120px", minHeight: "60px" }}>
         <svg
           width="100%"
@@ -217,7 +223,7 @@ function DocumentComponent({ data }: NodeProps<DocumentNode>) {
           {data.label}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="source" position={handles.source} style={HIDDEN_HANDLE_STYLE} />
     </>
   );
 }
@@ -231,9 +237,10 @@ export type NoteNode = Node<ShapeNodeData, "note">;
 
 function NoteComponent({ data }: NodeProps<NoteNode>) {
   const s = useVariant(data.variant);
+  const handles = getHandlePositions(data.direction);
   return (
     <>
-      <Handle type="target" position={Position.Top} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="target" position={handles.target} style={HIDDEN_HANDLE_STYLE} />
       <div style={{ position: "relative", minWidth: "120px", minHeight: "48px" }}>
         <svg
           width="100%"
@@ -269,7 +276,7 @@ function NoteComponent({ data }: NodeProps<NoteNode>) {
           {data.label}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="source" position={handles.source} style={HIDDEN_HANDLE_STYLE} />
     </>
   );
 }
@@ -283,9 +290,10 @@ export type SubroutineNode = Node<ShapeNodeData, "subroutine">;
 
 function SubroutineComponent({ data }: NodeProps<SubroutineNode>) {
   const s = useVariant(data.variant);
+  const handles = getHandlePositions(data.direction);
   return (
     <>
-      <Handle type="target" position={Position.Top} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="target" position={handles.target} style={HIDDEN_HANDLE_STYLE} />
       <div
         style={{
           position: "relative",
@@ -323,7 +331,7 @@ function SubroutineComponent({ data }: NodeProps<SubroutineNode>) {
         />
         {data.label}
       </div>
-      <Handle type="source" position={Position.Bottom} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="source" position={handles.source} style={HIDDEN_HANDLE_STYLE} />
     </>
   );
 }
@@ -337,9 +345,10 @@ export type TrapezoidNode = Node<ShapeNodeData, "trapezoid">;
 
 function TrapezoidComponent({ data }: NodeProps<TrapezoidNode>) {
   const s = useVariant(data.variant);
+  const handles = getHandlePositions(data.direction);
   return (
     <>
-      <Handle type="target" position={Position.Top} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="target" position={handles.target} style={HIDDEN_HANDLE_STYLE} />
       <div style={{ position: "relative", minWidth: "140px", minHeight: "48px" }}>
         <svg
           width="100%"
@@ -367,7 +376,7 @@ function TrapezoidComponent({ data }: NodeProps<TrapezoidNode>) {
           {data.label}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="source" position={handles.source} style={HIDDEN_HANDLE_STYLE} />
     </>
   );
 }

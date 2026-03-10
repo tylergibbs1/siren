@@ -193,8 +193,8 @@ const C4_TEMPLATE = `{
         { "id": "api", "label": "API Application", "description": "Provides banking via JSON/HTTPS" }
       ]
     },
-    { "id": "email", "label": "Email System", "description": "Sends emails to customers" },
-    { "id": "mainframe", "label": "Mainframe", "description": "Stores core banking data" }
+    { "id": "email", "label": "Email System", "type": "system", "description": "Sends emails to customers" },
+    { "id": "mainframe", "label": "Mainframe", "type": "system", "description": "Stores core banking data" }
   ],
   "relationships": [
     { "from": "user", "to": "webapp", "label": "Visits" },
@@ -396,12 +396,12 @@ const QUADRANT_TEMPLATE = `{
   "type": "quadrant",
   "title": "Feature Prioritization",
   "items": [
-    { "id": "q1", "label": "Auth v2" },
-    { "id": "q2", "label": "Dark Mode" },
-    { "id": "q3", "label": "Export PDF" },
-    { "id": "q4", "label": "Mobile App" },
-    { "id": "q5", "label": "Analytics" },
-    { "id": "q6", "label": "Webhooks" }
+    { "id": "q1", "label": "Auth v2", "x": 0.8, "y": 0.9 },
+    { "id": "q2", "label": "Dark Mode", "x": 0.3, "y": 0.7 },
+    { "id": "q3", "label": "Export PDF", "x": 0.6, "y": 0.4 },
+    { "id": "q4", "label": "Mobile App", "x": 0.9, "y": 0.2 },
+    { "id": "q5", "label": "Analytics", "x": 0.2, "y": 0.3 },
+    { "id": "q6", "label": "Webhooks", "x": 0.5, "y": 0.6 }
   ]
 }`;
 

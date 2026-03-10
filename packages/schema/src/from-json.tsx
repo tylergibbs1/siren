@@ -52,10 +52,31 @@ import {
   StateInitial,
   StateNode,
   Step,
+  Stadium,
+  Cylinder,
+  Hexagon,
+  Cloud,
+  Document,
+  Note,
+  Subroutine,
+  Trapezoid,
   Timeline,
   TimelineEvent,
   Transition,
 } from "@siren/presets";
+
+const SHAPE_COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
+  rounded: Step,
+  diamond: Decision,
+  stadium: Stadium,
+  cylinder: Cylinder,
+  hexagon: Hexagon,
+  cloud: Cloud,
+  document: Document,
+  note: Note,
+  subroutine: Subroutine,
+  trapezoid: Trapezoid,
+};
 
 const FILL_STYLE = { width: "100%", height: "100%" } as const;
 
@@ -73,16 +94,15 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
       return (
         <div style={FILL_STYLE}>
           <Flowchart direction={schema.direction} edgeType={schema.edgeType} mode={schema.interactive ? "interactive" : undefined}>
-            {schema.nodes.map((node) =>
-              node.shape === "diamond"
-                ? el(Decision, { key: node.id, id: node.id, label: node.label })
-                : el(Step, {
-                    key: node.id,
-                    id: node.id,
-                    label: node.label,
-                    variant: node.variant,
-                  })
-            )}
+            {schema.nodes.map((node) => {
+              const ShapeComponent = SHAPE_COMPONENT_MAP[node.shape ?? "rounded"] ?? Step;
+              return el(ShapeComponent, {
+                key: node.id,
+                id: node.id,
+                label: node.label,
+                variant: node.variant,
+              });
+            })}
             {schema.edges.map((edge, index) => (
               <FlowEdge
                 key={`edge-${index}`}

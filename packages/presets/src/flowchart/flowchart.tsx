@@ -111,7 +111,7 @@ const SHAPE_DISPLAY_NAME_MAP = new Map<string, string>(
   SHAPE_ENTRIES.map(([comp, type]) => [(comp as any).displayName ?? "", type])
 );
 
-function parseChildren(children: React.ReactNode, diagramEdgeType?: string) {
+function parseChildren(children: React.ReactNode, diagramEdgeType?: string, direction?: string) {
   const nodes: Node[] = [];
   const rawEdges: Array<Record<string, any>> = [];
 
@@ -132,6 +132,7 @@ function parseChildren(children: React.ReactNode, diagramEdgeType?: string) {
         data: {
           label: props.label,
           variant: props.variant,
+          direction,
         },
       });
     } else if (
@@ -200,7 +201,7 @@ function FlowchartInner({
 }: Omit<FlowchartProps, "theme">) {
   // Parse children once for initial state
   const initial = useMemo(
-    () => parseChildren(children, diagramEdgeType),
+    () => parseChildren(children, diagramEdgeType, direction),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -213,8 +214,8 @@ function FlowchartInner({
 
   // Re-parse when children change (after initial render)
   const { nodes, edges } = useMemo(
-    () => parseChildren(children, diagramEdgeType),
-    [children, diagramEdgeType]
+    () => parseChildren(children, diagramEdgeType, direction),
+    [children, diagramEdgeType, direction]
   );
 
   useEffect(() => {

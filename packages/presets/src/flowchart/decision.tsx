@@ -2,10 +2,11 @@
 
 import { memo } from "react";
 import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
-import { HIDDEN_HANDLE_STYLE } from "../shared/edge-styles";
+import { HIDDEN_HANDLE_STYLE, getHandlePositions } from "../shared/edge-styles";
 
 export type DecisionNodeData = {
   label: string;
+  direction?: string;
 };
 
 export type DecisionNode = Node<DecisionNodeData, "decision">;
@@ -45,20 +46,25 @@ const LABEL_STYLE = {
 } as const;
 
 function DecisionComponent({ data }: NodeProps<DecisionNode>) {
+  const handles = getHandlePositions(data.direction);
+  // Secondary handle on the perpendicular axis for branching
+  const isHorizontal = data.direction === "LR" || data.direction === "RL";
+  const secondaryPos = isHorizontal ? Position.Bottom : Position.Right;
+
   return (
     <>
-      <Handle type="target" position={Position.Top} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="target" position={handles.target} style={HIDDEN_HANDLE_STYLE} />
       <div style={CONTAINER_STYLE}>
         <div style={DIAMOND_STYLE} aria-hidden="true" />
         <span style={LABEL_STYLE}>
           {data.label}
         </span>
       </div>
-      <Handle type="source" position={Position.Bottom} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="source" position={handles.source} style={HIDDEN_HANDLE_STYLE} />
       <Handle
         type="source"
-        position={Position.Right}
-        id="right"
+        position={secondaryPos}
+        id="secondary"
         style={HIDDEN_HANDLE_STYLE}
       />
     </>

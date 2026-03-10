@@ -1,8 +1,8 @@
 "use client";
 
 import { memo } from "react";
-import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
-import { HIDDEN_HANDLE_STYLE } from "../shared/edge-styles";
+import { Handle, type NodeProps, type Node } from "@xyflow/react";
+import { HIDDEN_HANDLE_STYLE, getHandlePositions } from "../shared/edge-styles";
 import { VARIANT_STYLES, BASE_TEXT_STYLE } from "../shared/variant-styles";
 
 export type { StepVariant } from "../shared/variant-styles";
@@ -10,6 +10,7 @@ export type { StepVariant } from "../shared/variant-styles";
 export type StepNodeData = {
   label: string;
   variant?: import("../shared/variant-styles").StepVariant;
+  direction?: string;
 };
 
 export type StepNode = Node<StepNodeData, "step">;
@@ -17,10 +18,11 @@ export type StepNode = Node<StepNodeData, "step">;
 function StepComponent({ data }: NodeProps<StepNode>) {
   const variant = data.variant ?? "default";
   const s = VARIANT_STYLES[variant];
+  const handles = getHandlePositions(data.direction);
 
   return (
     <>
-      <Handle type="target" position={Position.Top} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="target" position={handles.target} style={HIDDEN_HANDLE_STYLE} />
       <div
         style={{
           padding: "12px 24px",
@@ -35,7 +37,7 @@ function StepComponent({ data }: NodeProps<StepNode>) {
       >
         {data.label}
       </div>
-      <Handle type="source" position={Position.Bottom} style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="source" position={handles.source} style={HIDDEN_HANDLE_STYLE} />
     </>
   );
 }
