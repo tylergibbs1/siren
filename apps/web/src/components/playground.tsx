@@ -4,6 +4,16 @@ import { PlaygroundProvider, usePlayground } from "./playground-context";
 import { CodeEditor } from "./code-editor";
 import { DiagramPreview } from "./diagram-preview";
 
+/** Ghost button: subtle shadow instead of hard border */
+const ghostBtn =
+  "rounded-md px-3 py-1.5 text-xs font-medium text-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_1px_2px_-1px_rgba(0,0,0,0.06),0_2px_4px_0_rgba(0,0,0,0.04)] transition-[box-shadow,background-color] hover:shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08),0_2px_4px_0_rgba(0,0,0,0.06)] hover:bg-scale-3";
+
+const ghostBtnSm =
+  "rounded-md px-2 py-1 text-xs text-muted-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_1px_2px_-1px_rgba(0,0,0,0.06)] transition-[box-shadow,color,background-color] hover:shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08)] hover:bg-scale-3 hover:text-foreground";
+
+const selectStyle =
+  "rounded-md bg-scale-2 px-3 py-1 text-sm text-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_1px_2px_-1px_rgba(0,0,0,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
 // ── Toolbar ─────────────────────────────────────────────────────────
 
 function PlaygroundToolbar() {
@@ -17,7 +27,7 @@ function PlaygroundToolbar() {
             value={state.template}
             onChange={actions.handleTemplateChange}
             aria-label="Diagram template"
-            className="rounded-md border border-border bg-scale-2 px-3 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className={selectStyle}
           >
             {Object.entries(meta.templates).map(([id, item]) => (
               <option key={id} value={id}>{item.label}</option>
@@ -27,7 +37,7 @@ function PlaygroundToolbar() {
             value={state.themeId}
             onChange={actions.handleThemeChange}
             aria-label="Color theme"
-            className="rounded-md border border-border bg-scale-2 px-3 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className={selectStyle}
           >
             {meta.themeOptions.map(({ id, label }) => (
               <option key={id} value={id}>{label}</option>
@@ -38,14 +48,14 @@ function PlaygroundToolbar() {
               type="button"
               onClick={() => actions.setShowThemeModal(true)}
               aria-label="Edit custom theme"
-              className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground transition-[color,background-color] hover:bg-scale-3 hover:text-foreground"
+              className={ghostBtnSm}
             >
               Edit CSS
             </button>
           )}
           <div className="hidden min-w-0 md:block">
-            <p className="text-sm text-foreground">{state.templateInfo.label}</p>
-            <p className="truncate text-xs text-muted-foreground">{state.templateInfo.description}</p>
+            <p className="text-sm text-foreground text-balance">{state.templateInfo.label}</p>
+            <p className="truncate text-xs text-muted-foreground text-balance">{state.templateInfo.description}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -55,11 +65,7 @@ function PlaygroundToolbar() {
           {state.error && (
             <span className="hidden max-w-72 truncate text-xs text-destructive lg:inline">{state.error}</span>
           )}
-          <button
-            type="button"
-            onClick={actions.handleCopy}
-            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-[color,background-color] hover:bg-scale-3"
-          >
+          <button type="button" onClick={actions.handleCopy} className={ghostBtn}>
             Copy JSON
           </button>
           <ExportMenu />
@@ -73,7 +79,7 @@ function PlaygroundToolbar() {
         </div>
       </div>
       <div className="mt-2 flex items-center justify-between gap-4">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground text-balance">
           V1 presets only. Canonical source of truth: Siren JSON.
         </p>
         {state.error && (
@@ -94,17 +100,17 @@ function ExportMenu() {
       <button
         type="button"
         onClick={() => actions.setShowExportMenu((prev) => !prev)}
-        className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-[color,background-color] hover:bg-scale-3"
+        className={ghostBtn}
       >
         Export
       </button>
       {state.showExportMenu && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-44 rounded-md border border-border bg-scale-2 py-1 shadow-lg">
-          <button type="button" onClick={actions.handleDownloadJSON} className="block w-full px-3 py-1.5 text-left text-xs text-foreground hover:bg-scale-3">Download JSON</button>
-          <button type="button" onClick={actions.handleExportSVG} className="block w-full px-3 py-1.5 text-left text-xs text-foreground hover:bg-scale-3">Download SVG</button>
-          <button type="button" onClick={actions.handleExportPNG} className="block w-full px-3 py-1.5 text-left text-xs text-foreground hover:bg-scale-3">Download PNG</button>
+        <div className="absolute right-0 top-full z-50 mt-1 w-44 rounded-md bg-scale-2 py-1 shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.12)]">
+          <button type="button" onClick={actions.handleDownloadJSON} className="block w-full rounded-sm px-3 py-1.5 text-left text-xs text-foreground hover:bg-scale-3">Download JSON</button>
+          <button type="button" onClick={actions.handleExportSVG} className="block w-full rounded-sm px-3 py-1.5 text-left text-xs text-foreground hover:bg-scale-3">Download SVG</button>
+          <button type="button" onClick={actions.handleExportPNG} className="block w-full rounded-sm px-3 py-1.5 text-left text-xs text-foreground hover:bg-scale-3">Download PNG</button>
           <div className="my-1 border-t border-border" />
-          <button type="button" onClick={actions.handleCopyEmbed} className="block w-full px-3 py-1.5 text-left text-xs text-foreground hover:bg-scale-3">Copy embed snippet</button>
+          <button type="button" onClick={actions.handleCopyEmbed} className="block w-full rounded-sm px-3 py-1.5 text-left text-xs text-foreground hover:bg-scale-3">Copy embed snippet</button>
         </div>
       )}
     </div>
@@ -121,11 +127,11 @@ function ThemeImportModal() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div
         ref={meta.themeModalRef}
-        className="mx-4 flex w-full max-w-lg flex-col gap-3 rounded-lg border border-border bg-scale-2 p-5 shadow-xl"
+        className="mx-4 flex w-full max-w-lg flex-col gap-3 rounded-lg bg-scale-2 p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_8px_24px_rgba(0,0,0,0.16)]"
       >
         <div>
-          <h3 className="text-sm font-medium text-foreground">Import tweakcn theme</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <h3 className="text-sm font-medium text-foreground text-balance">Import tweakcn theme</h3>
+          <p className="mt-1 text-xs text-muted-foreground text-balance">
             Paste your tweakcn / shadcn index.css to preview diagrams in your app&apos;s theme.
           </p>
         </div>
@@ -134,15 +140,11 @@ function ThemeImportModal() {
           onChange={(e) => { actions.setThemeCSS(e.target.value); actions.setThemeCSSError(null); }}
           placeholder={`:root {\n  --background: oklch(0.98 0 0);\n  --foreground: oklch(0.14 0 0);\n  ...\n}\n\n.dark {\n  --background: oklch(0.13 0 0);\n  ...\n}`}
           spellCheck={false}
-          className="h-64 w-full resize-none rounded-md border border-border bg-scale-1 p-3 font-mono text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-64 w-full resize-none rounded-sm bg-scale-1 p-3 font-mono text-xs text-foreground shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
         {state.themeCSSError && <p className="text-xs text-destructive">{state.themeCSSError}</p>}
         <div className="flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => actions.setShowThemeModal(false)}
-            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-[color,background-color] hover:bg-scale-3"
-          >
+          <button type="button" onClick={() => actions.setShowThemeModal(false)} className={ghostBtn}>
             Cancel
           </button>
           <button

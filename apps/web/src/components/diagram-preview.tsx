@@ -85,7 +85,7 @@ function PreviewInner({ code, onError, theme }: DiagramPreviewProps) {
 export const DiagramPreview = forwardRef<HTMLDivElement, DiagramPreviewProps>(
   function DiagramPreview(props, ref) {
     return (
-      <div ref={ref} className="h-full w-full">
+      <div ref={ref} className="h-full w-full" style={{ outline: "1px solid rgba(0,0,0,0.06)", outlineOffset: "-1px" }}>
         <PreviewInner {...props} />
       </div>
     );

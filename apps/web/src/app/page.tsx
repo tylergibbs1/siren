@@ -7,7 +7,7 @@ export default function Home() {
       <header className="border-b border-border shrink-0">
         <div className="h-12 px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold tracking-tight">Siren</h1>
+            <h1 className="text-lg font-semibold tracking-tight text-balance">Siren</h1>
             <span className="text-[10px] text-muted-foreground bg-scale-3 px-2 py-0.5 rounded-full font-medium">
               json-native
             </span>
@@ -30,7 +30,7 @@ export default function Home() {
           </div>
         </div>
         <div className="px-4 pb-4">
-          <p className="max-w-3xl text-sm text-muted-foreground">
+          <p className="max-w-3xl text-sm text-muted-foreground text-balance">
             Better Mermaid through typed JSON. Write a Siren document, validate it,
             and render an interactive diagram with sane defaults.
           </p>
