@@ -97,6 +97,11 @@ export { PacketDiagram } from "./packet/packet-diagram";
 // Shared
 export { ListNode } from "./shared/list-node";
 export type { ListNodeData } from "./shared/list-node";
+export { AnimatedEdge } from "./shared/animated-edge";
+export { SelfLoopEdge } from "./shared/self-loop-edge";
+export { EdgeWithButton } from "./shared/edge-with-button";
+export { DataFlowEdge } from "./shared/data-flow-edge";
+export type { DataFlowEdgeData, DataFlowEdgeType } from "./shared/data-flow-edge";
 
 // Re-export for convenience
 export type { LayoutDirection } from "@siren/core";

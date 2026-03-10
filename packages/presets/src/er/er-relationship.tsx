@@ -12,6 +12,8 @@ export function ERRelationship(_props: {
   to: string;
   cardinality?: ERCardinality;
   label?: string;
+  edgeType?: string;
+  bidirectional?: boolean;
 }) {
   return null;
 }

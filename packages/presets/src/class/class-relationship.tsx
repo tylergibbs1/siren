@@ -18,6 +18,8 @@ export function ClassRelationship(_props: {
   to: string;
   type?: ClassRelationshipType;
   label?: string;
+  edgeType?: string;
+  bidirectional?: boolean;
 }) {
   return null;
 }

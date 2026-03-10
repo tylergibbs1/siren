@@ -1,0 +1,69 @@
+---
+title: Render From JSON
+description: Render validated Siren JSON documents in React with fromJSON().
+---
+
+The main React workflow for Siren is:
+
+1. validate the JSON
+2. render the validated document
+
+## Basic usage
+
+```tsx
+import { fromJSON, validate } from "@siren/schema";
+
+const document = {
+  type: "sequence",
+  actors: [
+    { id: "user", label: "User" },
+    { id: "api", label: "API" },
+    { id: "db", label: "Database" }
+  ],
+  messages: [
+    { from: "user", to: "api", label: "POST /login" },
+    { from: "api", to: "db", label: "SELECT user" },
+    { from: "db", to: "api", label: "row", reply: true }
+  ]
+};
+
+export function LoginSequence() {
+  const result = validate(document);
+
+  if (!result.valid) {
+    return <pre>{result.errors.join("\n")}</pre>;
+  }
+
+  return fromJSON(result.data);
+}
+```
+
+## With dynamic input
+
+```tsx
+import { fromJSON, validate } from "@siren/schema";
+
+export function Diagram({ input }: { input: unknown }) {
+  const result = validate(input);
+
+  if (!result.valid) {
+    return <div>Invalid Siren document: {result.errors.join(", ")}</div>;
+  }
+
+  return fromJSON(result.data);
+}
+```
+
+## When to use preset components directly
+
+Use direct preset components when you are hand-authoring diagrams in React and want maximum control over component composition.
+
+Use `fromJSON()` when:
+
+- the source comes from a file
+- the source comes from the playground
+- the source comes from an API
+- the source comes from an LLM
+- you want JSON to remain the source of truth
+
+That is the preferred Siren architecture.

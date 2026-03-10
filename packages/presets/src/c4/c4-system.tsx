@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
+import { HIDDEN_HANDLE_STYLE } from "../shared/edge-styles";
 
 export type C4SystemData = {
   label: string;
@@ -19,7 +20,7 @@ function C4SystemComponent({ data }: NodeProps<C4SystemNode>) {
       <Handle
         type="target"
         position={Position.Top}
-        style={{ visibility: "hidden" }}
+        style={HIDDEN_HANDLE_STYLE}
       />
       <div
         style={{
@@ -65,7 +66,7 @@ function C4SystemComponent({ data }: NodeProps<C4SystemNode>) {
       <Handle
         type="source"
         position={Position.Bottom}
-        style={{ visibility: "hidden" }}
+        style={HIDDEN_HANDLE_STYLE}
       />
     </>
   );

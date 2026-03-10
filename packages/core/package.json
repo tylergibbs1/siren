@@ -19,6 +19,7 @@
     "elkjs": "^0.9.3"
   },
   "devDependencies": {
+    "@types/node": "^25.4.0",
     "tsup": "^8.4.0",
     "typescript": "^5.8.2"
   }

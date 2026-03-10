@@ -1,4 +1,6 @@
 export { validate } from "./validate";
+export { fromJSON } from "./from-json";
+export { SCHEMA_VERSION } from "./types";
 export type {
   FlowchartSchema,
   SequenceSchema,
@@ -21,6 +23,8 @@ export type {
   PacketSchema,
   SirenSchema,
   ValidationResult,
+  ValidationError,
+  ValidationErrorCode,
 } from "./types";
 
 export {
@@ -42,4 +46,5 @@ export {
   ganttJsonSchema,
   sankeyJsonSchema,
   packetJsonSchema,
+  sirenJsonSchema,
 } from "./json-schema";

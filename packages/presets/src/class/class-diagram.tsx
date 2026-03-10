@@ -1,9 +1,11 @@
 "use client";
 
-import React, { Children, isValidElement, useMemo } from "react";
+import React, { Children, isValidElement, useEffect, useRef, useMemo } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
   Background,
   BackgroundVariant,
   Controls,
@@ -21,9 +23,12 @@ import type { ClassRelationshipType } from "./class-relationship";
 import {
   EDGE_STYLE,
   EDGE_DASHED_STYLE,
+  EDGE_MARKER_START,
   EDGE_LABEL_STYLE,
   PRO_OPTIONS,
 } from "../shared/edge-styles";
+import { AnimatedEdge } from "../shared/animated-edge";
+import { SelfLoopEdge } from "../shared/self-loop-edge";
 
 function LayoutRunner({ direction }: { direction: LayoutDirection }) {
   useAutoLayout(direction);
@@ -36,17 +41,26 @@ interface ClassDiagramProps {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  edgeType?: string;
+  interactive?: boolean;
 }
 
 const nodeTypes = {
   class: ClassNode,
 };
 
+// Hoisted module-level — React Flow docs: "define edgeTypes outside of the component"
+const edgeTypes = { animated: AnimatedEdge, selfLoop: SelfLoopEdge };
+
+const DEFAULT_WRAPPER_STYLE = { width: "100%", height: "100%" };
+
 function getEdgeForRelationship(
   from: string,
   to: string,
   relType: ClassRelationshipType,
   label?: string,
+  edgeType?: string,
+  bidirectional?: boolean,
 ): Edge {
   const base = {
     id: `${from}-${to}-${relType}`,
@@ -55,9 +69,11 @@ function getEdgeForRelationship(
     labelStyle: EDGE_LABEL_STYLE,
   };
 
+  let edge: Edge;
+
   switch (relType) {
     case "inheritance":
-      return {
+      edge = {
         ...base,
         style: EDGE_STYLE,
         markerEnd: {
@@ -66,8 +82,9 @@ function getEdgeForRelationship(
         },
         label: label,
       };
+      break;
     case "composition":
-      return {
+      edge = {
         ...base,
         style: EDGE_STYLE,
         markerEnd: {
@@ -76,8 +93,9 @@ function getEdgeForRelationship(
         },
         label: label ? `\u25C6 ${label}` : "\u25C6",
       };
+      break;
     case "aggregation":
-      return {
+      edge = {
         ...base,
         style: EDGE_STYLE,
         markerEnd: {
@@ -86,8 +104,9 @@ function getEdgeForRelationship(
         },
         label: label ? `\u25C7 ${label}` : "\u25C7",
       };
+      break;
     case "association":
-      return {
+      edge = {
         ...base,
         style: EDGE_STYLE,
         markerEnd: {
@@ -96,8 +115,9 @@ function getEdgeForRelationship(
         },
         label: label,
       };
+      break;
     case "dependency":
-      return {
+      edge = {
         ...base,
         style: EDGE_DASHED_STYLE,
         markerEnd: {
@@ -106,8 +126,9 @@ function getEdgeForRelationship(
         },
         label: label,
       };
+      break;
     case "realization":
-      return {
+      edge = {
         ...base,
         style: EDGE_DASHED_STYLE,
         markerEnd: {
@@ -116,8 +137,9 @@ function getEdgeForRelationship(
         },
         label: label,
       };
+      break;
     default:
-      return {
+      edge = {
         ...base,
         style: EDGE_STYLE,
         markerEnd: {
@@ -127,6 +149,17 @@ function getEdgeForRelationship(
         label: label,
       };
   }
+
+  const isSelfLoop = from === to;
+  const resolvedType = isSelfLoop ? "selfLoop" : edgeType;
+  if (resolvedType && resolvedType !== "default") {
+    edge.type = resolvedType;
+  }
+  if (bidirectional) {
+    edge.markerStart = EDGE_MARKER_START;
+  }
+
+  return edge;
 }
 
 function ClassDiagramInner({
@@ -134,7 +167,13 @@ function ClassDiagramInner({
   children,
   className,
   style,
+  edgeType: diagramEdgeType,
+  interactive,
 }: Omit<ClassDiagramProps, "theme">) {
+  const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
+  const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const prevKeyRef = useRef("");
+
   const { nodes, edges } = useMemo(() => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
@@ -161,32 +200,41 @@ function ClassDiagramInner({
         });
       } else if (
         type === ClassRelationship ||
-        (type as any)?.name === "ClassRelationship" ||
-        props.from
+        (type as any)?.displayName === "ClassRelationship"
       ) {
         const relType: ClassRelationshipType = props.type ?? "association";
-        edges.push(getEdgeForRelationship(props.from, props.to, relType, props.label));
+        edges.push(getEdgeForRelationship(props.from, props.to, relType, props.label, props.edgeType ?? diagramEdgeType, props.bidirectional));
       }
     });
 
     return { nodes, edges };
-  }, [children]);
+  }, [children, diagramEdgeType]);
+
+  useEffect(() => {
+    const key = nodes.map((n) => n.id).join(",") + "|" + edges.map((e) => e.id).join(",");
+    if (key === prevKeyRef.current) return;
+    prevKeyRef.current = key;
+    setRfNodes(nodes);
+    setRfEdges(edges);
+  }, [nodes, edges, setRfNodes, setRfEdges]);
 
   return (
     <div
       className={className}
-      style={{ width: "100%", height: "100%", ...style }}
+      style={style ? { ...DEFAULT_WRAPPER_STYLE, ...style } : DEFAULT_WRAPPER_STYLE}
     >
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={rfNodes}
+        edges={rfEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         fitView
         proOptions={PRO_OPTIONS}
-        nodesDraggable={false}
+        nodesDraggable={interactive ?? false}
         nodesConnectable={false}
-        elementsSelectable={false}
-        onlyRenderVisibleElements
+        elementsSelectable={interactive ?? false}
         minZoom={0.3}
         maxZoom={2}
       >
@@ -203,11 +251,20 @@ function ClassDiagramInner({
   );
 }
 
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = React.useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return <>{children}</>;
+}
+
 export function ClassDiagram({ theme, ...props }: ClassDiagramProps) {
   const inner = (
-    <ReactFlowProvider>
-      <ClassDiagramInner {...props} />
-    </ReactFlowProvider>
+    <ClientOnly>
+      <ReactFlowProvider>
+        <ClassDiagramInner {...props} />
+      </ReactFlowProvider>
+    </ClientOnly>
   );
 
   if (theme) {

@@ -10,6 +10,8 @@ export function Transition(_props: {
   to: string;
   label?: string;
   guard?: string;
+  edgeType?: string;
+  bidirectional?: boolean;
 }) {
   return null;
 }

@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
+import { HIDDEN_HANDLE_STYLE } from "../shared/edge-styles";
 
 export type ERColumn = {
   name: string;
@@ -21,8 +22,8 @@ export type EREntityNode = Node<EREntityData, "er-entity">;
 function EREntityComponent({ data }: NodeProps<EREntityNode>) {
   return (
     <>
-      <Handle type="target" position={Position.Top} id="top" style={{ visibility: "hidden" }} />
-      <Handle type="target" position={Position.Left} id="left" style={{ visibility: "hidden" }} />
+      <Handle type="target" position={Position.Top} id="top" style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="target" position={Position.Left} id="left" style={HIDDEN_HANDLE_STYLE} />
       <div
         style={{
           minWidth: "220px",
@@ -150,8 +151,8 @@ function EREntityComponent({ data }: NodeProps<EREntityNode>) {
           </div>
         ))}
       </div>
-      <Handle type="source" position={Position.Bottom} id="bottom" style={{ visibility: "hidden" }} />
-      <Handle type="source" position={Position.Right} id="right" style={{ visibility: "hidden" }} />
+      <Handle type="source" position={Position.Bottom} id="bottom" style={HIDDEN_HANDLE_STYLE} />
+      <Handle type="source" position={Position.Right} id="right" style={HIDDEN_HANDLE_STYLE} />
     </>
   );
 }

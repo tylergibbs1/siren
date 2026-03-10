@@ -1,17 +1,21 @@
 "use client";
 
-import React, { Children, isValidElement, useMemo } from "react";
+import React, { Children, isValidElement, useEffect, useRef, useMemo } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
   Background,
   BackgroundVariant,
+  Controls,
   type Node,
   type Edge,
 } from "@xyflow/react";
 import { SirenProvider } from "@siren/themes";
 import type { SirenTheme } from "@siren/themes";
 import { Actor } from "./actor";
+import { Message } from "./message";
 import {
   EDGE_STYLE,
   EDGE_DASHED_STYLE,
@@ -48,6 +52,10 @@ function SequenceInner({
   className,
   style,
 }: Omit<SequenceProps, "theme">) {
+  const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
+  const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const prevKeyRef = useRef("");
+
   const wrapperStyle = style
     ? { ...DEFAULT_WRAPPER_STYLE, ...style }
     : DEFAULT_WRAPPER_STYLE;
@@ -69,7 +77,10 @@ function SequenceInner({
 
       if (type === Actor || (type as any)?.displayName === "Actor") {
         actors.push({ id: props.id, label: props.label });
-      } else if (props.from && props.to) {
+      } else if (
+        type === Message ||
+        (type as any)?.displayName === "Message"
+      ) {
         messages.push({
           from: props.from,
           to: props.to,
@@ -102,11 +113,21 @@ function SequenceInner({
     return { nodes, edges };
   }, [children]);
 
+  useEffect(() => {
+    const key = nodes.map((n) => n.id).join(",") + "|" + edges.map((e) => e.id).join(",");
+    if (key === prevKeyRef.current) return;
+    prevKeyRef.current = key;
+    setRfNodes(nodes);
+    setRfEdges(edges);
+  }, [nodes, edges, setRfNodes, setRfEdges]);
+
   return (
     <div className={className} style={wrapperStyle}>
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={rfNodes}
+        edges={rfEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
         proOptions={PRO_OPTIONS}
@@ -122,16 +143,26 @@ function SequenceInner({
           size={1}
           color="var(--siren-node-border, hsl(0 0% 18%))"
         />
+        <Controls />
       </ReactFlow>
     </div>
   );
 }
 
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = React.useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return <>{children}</>;
+}
+
 export function Sequence({ theme, ...props }: SequenceProps) {
   const inner = (
-    <ReactFlowProvider>
-      <SequenceInner {...props} />
-    </ReactFlowProvider>
+    <ClientOnly>
+      <ReactFlowProvider>
+        <SequenceInner {...props} />
+      </ReactFlowProvider>
+    </ClientOnly>
   );
 
   if (theme) {

@@ -1,9 +1,11 @@
 "use client";
 
-import React, { Children, isValidElement, useMemo } from "react";
+import React, { Children, isValidElement, useEffect, useRef, useMemo } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
   Background,
   BackgroundVariant,
   type Node,
@@ -30,6 +32,10 @@ function TimelineInner({
   className,
   style,
 }: Omit<TimelineProps, "theme">) {
+  const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
+  const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const prevKeyRef = useRef("");
+
   const { nodes, edges } = useMemo(() => {
     const events: Array<{
       id: string;
@@ -94,14 +100,24 @@ function TimelineInner({
     return { nodes, edges };
   }, [children]);
 
+  useEffect(() => {
+    const key = nodes.map((n) => n.id).join(",") + "|" + edges.map((e) => e.id).join(",");
+    if (key === prevKeyRef.current) return;
+    prevKeyRef.current = key;
+    setRfNodes(nodes);
+    setRfEdges(edges);
+  }, [nodes, edges, setRfNodes, setRfEdges]);
+
   return (
     <div
       className={className}
       style={{ width: "100%", height: "100%", ...style }}
     >
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={rfNodes}
+        edges={rfEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
         proOptions={PRO_OPTIONS}

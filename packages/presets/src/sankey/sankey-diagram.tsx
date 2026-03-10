@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
   Background,
   BackgroundVariant,
   Controls,
@@ -94,6 +96,10 @@ function SankeyDiagramInner({
   className,
   style,
 }: Omit<SankeyDiagramProps, "theme">) {
+  const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
+  const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const prevKeyRef = useRef("");
+
   const { nodes, edges } = useMemo(() => {
     const COLUMN_SPACING = 200;
     const NODE_WIDTH = 24;
@@ -165,14 +171,24 @@ function SankeyDiagramInner({
     return { nodes, edges };
   }, [nodeDefs, flows]);
 
+  useEffect(() => {
+    const key = nodes.map((n) => n.id).join(",") + "|" + edges.map((e) => e.id).join(",");
+    if (key === prevKeyRef.current) return;
+    prevKeyRef.current = key;
+    setRfNodes(nodes);
+    setRfEdges(edges);
+  }, [nodes, edges, setRfNodes, setRfEdges]);
+
   return (
     <div
       className={className}
       style={{ width: "100%", height: "100%", ...style }}
     >
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={rfNodes}
+        edges={rfEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
@@ -180,7 +196,6 @@ function SankeyDiagramInner({
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
-        onlyRenderVisibleElements
         minZoom={0.3}
         maxZoom={2}
       >

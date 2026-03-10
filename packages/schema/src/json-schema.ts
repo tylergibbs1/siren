@@ -5,6 +5,8 @@ export const flowchartJsonSchema = {
   properties: {
     type: { const: "flowchart" },
     direction: { enum: ["TB", "BT", "LR", "RL"] },
+    edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+    interactive: { type: "boolean" },
     nodes: {
       type: "array",
       items: {
@@ -31,6 +33,9 @@ export const flowchartJsonSchema = {
           label: { type: "string" },
           dashed: { type: "boolean" },
           animated: { type: "boolean" },
+          edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+          bidirectional: { type: "boolean" },
+          value: { oneOf: [{ type: "string" }, { type: "number" }] },
         },
       },
     },
@@ -43,6 +48,7 @@ export const sequenceJsonSchema = {
   required: ["type", "actors", "messages"],
   properties: {
     type: { const: "sequence" },
+    interactive: { type: "boolean" },
     actors: {
       type: "array",
       items: {
@@ -77,6 +83,8 @@ export const stateJsonSchema = {
   properties: {
     type: { const: "state" },
     direction: { enum: ["TB", "BT", "LR", "RL"] },
+    edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+    interactive: { type: "boolean" },
     states: {
       type: "array",
       items: {
@@ -103,6 +111,8 @@ export const stateJsonSchema = {
           to: { type: "string" },
           label: { type: "string" },
           guard: { type: "string" },
+          edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+          bidirectional: { type: "boolean" },
         },
       },
     },
@@ -116,6 +126,8 @@ export const classJsonSchema = {
   properties: {
     type: { const: "class" },
     direction: { enum: ["TB", "BT", "LR", "RL"] },
+    edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+    interactive: { type: "boolean" },
     classes: {
       type: "array",
       items: {
@@ -148,6 +160,8 @@ export const classJsonSchema = {
             ],
           },
           label: { type: "string" },
+          edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+          bidirectional: { type: "boolean" },
         },
       },
     },
@@ -161,6 +175,8 @@ export const erJsonSchema = {
   properties: {
     type: { const: "er" },
     direction: { enum: ["TB", "BT", "LR", "RL"] },
+    edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+    interactive: { type: "boolean" },
     entities: {
       type: "array",
       items: {
@@ -196,6 +212,8 @@ export const erJsonSchema = {
           to: { type: "string" },
           cardinality: { enum: ["1:1", "1:N", "N:1", "M:N"] },
           label: { type: "string" },
+          edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+          bidirectional: { type: "boolean" },
         },
       },
     },
@@ -319,6 +337,8 @@ export const c4JsonSchema = {
   properties: {
     type: { const: "c4" },
     direction: { enum: ["TB", "BT", "LR", "RL"] },
+    edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+    interactive: { type: "boolean" },
     elements: {
       type: "array",
       items: {
@@ -354,6 +374,8 @@ export const c4JsonSchema = {
           from: { type: "string" },
           to: { type: "string" },
           label: { type: "string" },
+          edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+          bidirectional: { type: "boolean" },
         },
       },
     },
@@ -367,6 +389,8 @@ export const architectureJsonSchema = {
   properties: {
     type: { const: "architecture" },
     direction: { enum: ["TB", "BT", "LR", "RL"] },
+    edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+    interactive: { type: "boolean" },
     groups: {
       type: "array",
       items: {
@@ -412,6 +436,8 @@ export const architectureJsonSchema = {
           from: { type: "string" },
           to: { type: "string" },
           label: { type: "string" },
+          edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+          bidirectional: { type: "boolean" },
         },
       },
     },
@@ -425,6 +451,8 @@ export const blockJsonSchema = {
   properties: {
     type: { const: "block" },
     direction: { enum: ["TB", "BT", "LR", "RL"] },
+    edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+    interactive: { type: "boolean" },
     blocks: {
       type: "array",
       items: {
@@ -456,6 +484,8 @@ export const blockJsonSchema = {
           from: { type: "string" },
           to: { type: "string" },
           label: { type: "string" },
+          edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+          bidirectional: { type: "boolean" },
         },
       },
     },
@@ -469,6 +499,8 @@ export const requirementJsonSchema = {
   properties: {
     type: { const: "requirement" },
     direction: { enum: ["TB", "BT", "LR", "RL"] },
+    edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+    interactive: { type: "boolean" },
     requirements: {
       type: "array",
       items: {
@@ -501,6 +533,8 @@ export const requirementJsonSchema = {
               "contains",
             ],
           },
+          edgeType: { type: "string", enum: ["bezier", "smoothstep", "step", "straight"] },
+          bidirectional: { type: "boolean" },
         },
       },
     },
@@ -652,4 +686,31 @@ export const packetJsonSchema = {
       },
     },
   },
+} as const;
+
+export const sirenJsonSchema = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  $id: "https://siren.dev/schema/v0.1.0",
+  title: "Siren Diagram",
+  description: "A JSON-native diagram document for Siren. See https://siren.dev/docs/json-schema for details.",
+  oneOf: [
+  flowchartJsonSchema,
+  sequenceJsonSchema,
+  stateJsonSchema,
+  classJsonSchema,
+  erJsonSchema,
+  timelineJsonSchema,
+  kanbanJsonSchema,
+  quadrantJsonSchema,
+  pieJsonSchema,
+  c4JsonSchema,
+  architectureJsonSchema,
+  blockJsonSchema,
+  requirementJsonSchema,
+  mindmapJsonSchema,
+  gitgraphJsonSchema,
+  ganttJsonSchema,
+  sankeyJsonSchema,
+  packetJsonSchema,
+  ],
 } as const;

@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
+import { HIDDEN_HANDLE_STYLE } from "../shared/edge-styles";
 
 export type StateVariant = "default" | "primary" | "success" | "warning" | "danger";
 
@@ -52,7 +53,7 @@ function StateNodeComponent({ data }: NodeProps<StateNodeType>) {
       <Handle
         type="target"
         position={Position.Top}
-        style={{ visibility: "hidden" }}
+        style={HIDDEN_HANDLE_STYLE}
       />
       <div
         style={{
@@ -75,7 +76,7 @@ function StateNodeComponent({ data }: NodeProps<StateNodeType>) {
       <Handle
         type="source"
         position={Position.Bottom}
-        style={{ visibility: "hidden" }}
+        style={HIDDEN_HANDLE_STYLE}
       />
     </>
   );

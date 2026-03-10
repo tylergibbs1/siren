@@ -9,6 +9,8 @@ export function Connection(_props: {
   from: string;
   to: string;
   label?: string;
+  edgeType?: string;
+  bidirectional?: boolean;
 }) {
   return null;
 }

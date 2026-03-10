@@ -2,6 +2,9 @@
   "title": "Documentation",
   "pages": [
     "index",
+    "---JSON-first Workflow---",
+    "json-schema",
+    "render-from-json",
     "---Diagram Types---",
     "flowchart",
     "sequence",

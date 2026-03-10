@@ -1,9 +1,11 @@
 "use client";
 
-import React, { Children, isValidElement, useMemo } from "react";
+import React, { Children, isValidElement, useEffect, useRef, useMemo } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
   Background,
   BackgroundVariant,
   Controls,
@@ -20,9 +22,13 @@ import { ERRelationship } from "./er-relationship";
 import type { ERCardinality } from "./er-relationship";
 import {
   EDGE_STYLE,
+  EDGE_MARKER_START,
   EDGE_LABEL_STYLE,
+  EDGE_LABEL_BG_STYLE,
   PRO_OPTIONS,
 } from "../shared/edge-styles";
+import { AnimatedEdge } from "../shared/animated-edge";
+import { SelfLoopEdge } from "../shared/self-loop-edge";
 
 function LayoutRunner({ direction }: { direction: LayoutDirection }) {
   useAutoLayout(direction);
@@ -35,11 +41,18 @@ interface ERDiagramProps {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  edgeType?: string;
+  interactive?: boolean;
 }
 
 const nodeTypes = {
   "er-entity": EREntity,
 };
+
+// Hoisted module-level — React Flow docs: "define edgeTypes outside of the component"
+const edgeTypes = { animated: AnimatedEdge, selfLoop: SelfLoopEdge };
+
+const DEFAULT_WRAPPER_STYLE = { width: "100%", height: "100%" };
 
 const cardinalityLabels: Record<ERCardinality, string> = {
   "1:1": "1 \u2500\u2500 1",
@@ -53,7 +66,13 @@ function ERDiagramInner({
   children,
   className,
   style,
+  edgeType: diagramEdgeType,
+  interactive,
 }: Omit<ERDiagramProps, "theme">) {
+  const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
+  const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const prevKeyRef = useRef("");
+
   const { nodes, edges } = useMemo(() => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
@@ -79,8 +98,7 @@ function ERDiagramInner({
         });
       } else if (
         type === ERRelationship ||
-        (type as any)?.name === "ERRelationship" ||
-        props.from
+        (type as any)?.displayName === "ERRelationship"
       ) {
         const cardinality: ERCardinality = props.cardinality ?? "1:N";
         const cardLabel = cardinalityLabels[cardinality];
@@ -88,8 +106,13 @@ function ERDiagramInner({
           ? `${cardLabel}  ${props.label}`
           : cardLabel;
 
-        edges.push({
-          id: `${props.from}-${props.to}`,
+        const isSelfLoop = props.from === props.to;
+        const resolvedType = isSelfLoop
+          ? "selfLoop"
+          : props.edgeType ?? diagramEdgeType;
+
+        const edge: Edge = {
+          id: `${props.from}-${props.to}-${edges.length}`,
           source: props.from,
           target: props.to,
           label,
@@ -99,31 +122,49 @@ function ERDiagramInner({
             color: "var(--siren-edge, hsl(0 0% 40%))",
           },
           labelStyle: EDGE_LABEL_STYLE,
-          labelBgStyle: {
-            fill: "var(--siren-bg, hsl(0 0% 12.2%))",
-          },
-        });
+          labelBgStyle: EDGE_LABEL_BG_STYLE,
+        };
+
+        if (resolvedType && resolvedType !== "default") {
+          edge.type = resolvedType;
+        }
+
+        if (props.bidirectional) {
+          edge.markerStart = EDGE_MARKER_START;
+        }
+
+        edges.push(edge);
       }
     });
 
     return { nodes, edges };
-  }, [children]);
+  }, [children, diagramEdgeType]);
+
+  useEffect(() => {
+    const key = nodes.map((n) => n.id).join(",") + "|" + edges.map((e) => e.id).join(",");
+    if (key === prevKeyRef.current) return;
+    prevKeyRef.current = key;
+    setRfNodes(nodes);
+    setRfEdges(edges);
+  }, [nodes, edges, setRfNodes, setRfEdges]);
 
   return (
     <div
       className={className}
-      style={{ width: "100%", height: "100%", ...style }}
+      style={style ? { ...DEFAULT_WRAPPER_STYLE, ...style } : DEFAULT_WRAPPER_STYLE}
     >
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={rfNodes}
+        edges={rfEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         fitView
         proOptions={PRO_OPTIONS}
-        nodesDraggable={false}
+        nodesDraggable={interactive ?? false}
         nodesConnectable={false}
-        elementsSelectable={false}
-        onlyRenderVisibleElements
+        elementsSelectable={interactive ?? false}
         minZoom={0.3}
         maxZoom={2}
       >
@@ -140,11 +181,20 @@ function ERDiagramInner({
   );
 }
 
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = React.useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return <>{children}</>;
+}
+
 export function ERDiagram({ theme, ...props }: ERDiagramProps) {
   const inner = (
-    <ReactFlowProvider>
-      <ERDiagramInner {...props} />
-    </ReactFlowProvider>
+    <ClientOnly>
+      <ReactFlowProvider>
+        <ERDiagramInner {...props} />
+      </ReactFlowProvider>
+    </ClientOnly>
   );
 
   if (theme) {

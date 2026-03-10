@@ -11,6 +11,11 @@ export function FlowEdge(_props: {
   label?: string;
   dashed?: boolean;
   animated?: boolean;
+  edgeType?: string;
+  bidirectional?: boolean;
+  value?: string | number;
 }) {
   return null;
 }
+
+FlowEdge.displayName = "FlowEdge";

@@ -18,14 +18,15 @@
   "dependencies": {
     "@siren/core": "workspace:*",
     "@siren/react": "workspace:*",
-    "@siren/themes": "workspace:*",
-    "@xyflow/react": "^12.6.0"
+    "@siren/themes": "workspace:*"
   },
   "peerDependencies": {
+    "@xyflow/react": "^12.6.0",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
+    "@xyflow/react": "^12.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "@types/react": "^19.0.0",

@@ -3,6 +3,7 @@
 import { useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import type { Monaco } from "@monaco-editor/react";
+import { sirenJsonSchema } from "@siren/schema";
 
 // Dynamic import with ssr: false — Monaco is ~300KB+ (bundle-dynamic-imports)
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
@@ -18,78 +19,7 @@ const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
 const SIREN_JSON_SCHEMA = {
   uri: "https://siren.dev/schema.json",
   fileMatch: ["*"],
-  schema: {
-    oneOf: [
-      {
-        type: "object",
-        required: ["type", "nodes", "edges"],
-        properties: {
-          type: { const: "flowchart" },
-          direction: { enum: ["TB", "BT", "LR", "RL"] },
-          nodes: {
-            type: "array",
-            items: {
-              type: "object",
-              required: ["id", "label"],
-              properties: {
-                id: { type: "string" },
-                label: { type: "string" },
-                shape: { enum: ["rounded", "rectangle", "diamond"] },
-                variant: {
-                  enum: ["default", "primary", "success", "warning", "danger"],
-                },
-              },
-            },
-          },
-          edges: {
-            type: "array",
-            items: {
-              type: "object",
-              required: ["from", "to"],
-              properties: {
-                from: { type: "string" },
-                to: { type: "string" },
-                label: { type: "string" },
-                dashed: { type: "boolean" },
-                animated: { type: "boolean" },
-              },
-            },
-          },
-        },
-      },
-      {
-        type: "object",
-        required: ["type", "actors", "messages"],
-        properties: {
-          type: { const: "sequence" },
-          actors: {
-            type: "array",
-            items: {
-              type: "object",
-              required: ["id", "label"],
-              properties: {
-                id: { type: "string" },
-                label: { type: "string" },
-              },
-            },
-          },
-          messages: {
-            type: "array",
-            items: {
-              type: "object",
-              required: ["from", "to"],
-              properties: {
-                from: { type: "string" },
-                to: { type: "string" },
-                label: { type: "string" },
-                reply: { type: "boolean" },
-              },
-            },
-          },
-        },
-      },
-    ],
-  },
+  schema: sirenJsonSchema,
 };
 
 // Hoisted editor options — avoids object recreation (rendering-hoist-jsx)

@@ -1,6 +1,8 @@
 export interface FlowchartSchema {
   type: "flowchart";
   direction?: "TB" | "BT" | "LR" | "RL";
+  edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+  interactive?: boolean;
   nodes: Array<{
     id: string;
     label: string;
@@ -13,11 +15,15 @@ export interface FlowchartSchema {
     label?: string;
     dashed?: boolean;
     animated?: boolean;
+    edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+    bidirectional?: boolean;
+    value?: string | number;
   }>;
 }
 
 export interface SequenceSchema {
   type: "sequence";
+  interactive?: boolean;
   actors: Array<{
     id: string;
     label: string;
@@ -33,6 +39,8 @@ export interface SequenceSchema {
 export interface StateSchema {
   type: "state";
   direction?: "TB" | "BT" | "LR" | "RL";
+  edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+  interactive?: boolean;
   states: Array<{
     id: string;
     label: string;
@@ -45,12 +53,16 @@ export interface StateSchema {
     to: string;
     label?: string;
     guard?: string;
+    edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+    bidirectional?: boolean;
   }>;
 }
 
 export interface ClassSchema {
   type: "class";
   direction?: "TB" | "BT" | "LR" | "RL";
+  edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+  interactive?: boolean;
   classes: Array<{
     id: string;
     name: string;
@@ -68,12 +80,16 @@ export interface ClassSchema {
       | "dependency"
       | "realization";
     label?: string;
+    edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+    bidirectional?: boolean;
   }>;
 }
 
 export interface ERSchema {
   type: "er";
   direction?: "TB" | "BT" | "LR" | "RL";
+  edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+  interactive?: boolean;
   entities: Array<{
     id: string;
     name: string;
@@ -90,6 +106,8 @@ export interface ERSchema {
     to: string;
     cardinality: "1:1" | "1:N" | "N:1" | "M:N";
     label?: string;
+    edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+    bidirectional?: boolean;
   }>;
 }
 
@@ -144,6 +162,8 @@ export interface PieSchema {
 export interface C4Schema {
   type: "c4";
   direction?: "TB" | "BT" | "LR" | "RL";
+  edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+  interactive?: boolean;
   elements: Array<{
     id: string;
     label: string;
@@ -160,12 +180,16 @@ export interface C4Schema {
     from: string;
     to: string;
     label?: string;
+    edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+    bidirectional?: boolean;
   }>;
 }
 
 export interface ArchitectureSchema {
   type: "architecture";
   direction?: "TB" | "BT" | "LR" | "RL";
+  edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+  interactive?: boolean;
   groups: Array<{
     id: string;
     label: string;
@@ -185,12 +209,16 @@ export interface ArchitectureSchema {
     from: string;
     to: string;
     label?: string;
+    edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+    bidirectional?: boolean;
   }>;
 }
 
 export interface BlockSchema {
   type: "block";
   direction?: "TB" | "BT" | "LR" | "RL";
+  edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+  interactive?: boolean;
   blocks: Array<{
     id: string;
     label: string;
@@ -203,12 +231,16 @@ export interface BlockSchema {
     from: string;
     to: string;
     label?: string;
+    edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+    bidirectional?: boolean;
   }>;
 }
 
 export interface RequirementSchema {
   type: "requirement";
   direction?: "TB" | "BT" | "LR" | "RL";
+  edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+  interactive?: boolean;
   requirements: Array<{
     id: string;
     label: string;
@@ -226,6 +258,8 @@ export interface RequirementSchema {
       | "verifies"
       | "refines"
       | "contains";
+    edgeType?: "bezier" | "smoothstep" | "step" | "straight";
+    bidirectional?: boolean;
   }>;
 }
 
@@ -316,8 +350,29 @@ export type SirenSchema =
   | SankeySchema
   | PacketSchema;
 
+/** Current schema version. Bump on breaking changes to the document format. */
+export const SCHEMA_VERSION = "0.1.0";
+
+export type ValidationErrorCode =
+  | "INVALID_INPUT"
+  | "MISSING_FIELD"
+  | "INVALID_FIELD"
+  | "UNKNOWN_TYPE"
+  | "DUPLICATE_ID"
+  | "UNKNOWN_REFERENCE"
+  | "INVALID_ENUM";
+
+export interface ValidationError {
+  /** Machine-readable error code */
+  code: ValidationErrorCode;
+  /** Human-readable error message */
+  message: string;
+  /** JSON-pointer-style path to the error location (e.g. "edges[0].from") */
+  path?: string;
+}
+
 export interface ValidationResult {
   valid: boolean;
   data?: SirenSchema;
-  errors?: string[];
+  errors?: ValidationError[];
 }

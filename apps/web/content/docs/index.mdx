@@ -1,9 +1,11 @@
 ---
 title: Getting Started
-description: Learn the Siren JSON syntax to create diagrams in the playground.
+description: Learn the JSON-first Siren workflow for creating and rendering diagrams.
 ---
 
-Siren uses JSON to describe diagrams. Write JSON in the editor, and the diagram renders live in the preview panel.
+Siren uses typed JSON to describe diagrams. Write JSON in the editor, validate it, and render it live in the preview panel.
+
+Siren does not invent a custom diagram language. JSON is the canonical format.
 
 ## Supported Diagram Types
 
@@ -11,6 +13,16 @@ Siren uses JSON to describe diagrams. Write JSON in the editor, and the diagram 
 | --- | --- |
 | [Flowchart](/docs/flowchart) | Process flows, decision trees, pipelines |
 | [Sequence](/docs/sequence) | API calls, service communication, request/response patterns |
+| [Architecture](/docs/architecture) | Services, zones, and infrastructure diagrams |
+| [ER](/docs/er) | Entities, fields, and relationships |
+
+## Core workflow
+
+The recommended Siren workflow is:
+
+1. Create a Siren JSON document
+2. Run [`validate()`](/docs/json-schema)
+3. Render with [`fromJSON()`](/docs/render-from-json)
 
 ## Basic Structure
 
@@ -51,3 +63,10 @@ Paste this into the [Playground](/) editor:
 ```
 
 Nodes are the boxes. Edges are the arrows between them. Siren handles all the layout automatically.
+
+## Next steps
+
+- [JSON Schema](/docs/json-schema)
+- [Render From JSON](/docs/render-from-json)
+- [Flowchart](/docs/flowchart)
+- [Sequence](/docs/sequence)

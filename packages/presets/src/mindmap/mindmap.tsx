@@ -215,9 +215,7 @@ function MindmapLayout({
           return { ...node, position: { x: laid.x, y: laid.y } };
         })
       );
-      requestAnimationFrame(() => {
-        fitView({ padding: 0.2, duration: 200 });
-      });
+      fitView({ padding: 0.2, duration: 200 });
     });
   }, [nodesInitialized, edges, setNodes, fitView]);
 
@@ -233,7 +231,6 @@ function MindmapLayout({
       nodesDraggable={false}
       nodesConnectable={false}
       elementsSelectable={false}
-      onlyRenderVisibleElements
       minZoom={0.3}
       maxZoom={2}
     >

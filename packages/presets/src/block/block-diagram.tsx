@@ -1,9 +1,13 @@
 "use client";
 
-import React, { Children, isValidElement, useMemo } from "react";
+import React, { Children, isValidElement, useEffect, useRef, useMemo } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
+  useReactFlow,
+  useStore,
   Background,
   BackgroundVariant,
   Controls,
@@ -13,20 +17,19 @@ import {
 import { SirenProvider } from "@siren/themes";
 import type { SirenTheme } from "@siren/themes";
 import type { LayoutDirection } from "@siren/core";
-import { useAutoLayout } from "@siren/react";
+import { layoutGraph } from "@siren/core";
 import { BlockNode } from "./block-node";
 import { BlockGroup } from "./block-group";
+import { Connection } from "./connection";
 import {
   EDGE_STYLE,
   EDGE_MARKER,
+  EDGE_MARKER_START,
   EDGE_LABEL_STYLE,
   PRO_OPTIONS,
 } from "../shared/edge-styles";
-
-function LayoutRunner({ direction }: { direction: LayoutDirection }) {
-  useAutoLayout(direction);
-  return null;
-}
+import { AnimatedEdge } from "../shared/animated-edge";
+import { SelfLoopEdge } from "../shared/self-loop-edge";
 
 interface BlockDiagramProps {
   direction?: LayoutDirection;
@@ -34,7 +37,12 @@ interface BlockDiagramProps {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  edgeType?: string;
+  interactive?: boolean;
 }
+
+// Hoisted module-level — React Flow docs: "define edgeTypes outside of the component"
+const edgeTypes = { animated: AnimatedEdge, selfLoop: SelfLoopEdge };
 
 // Hoisted module-level
 const nodeTypes = {
@@ -42,15 +50,19 @@ const nodeTypes = {
   "block-group": BlockGroup,
 };
 
+const DEFAULT_WRAPPER_STYLE = { width: "100%", height: "100%" };
+
 /**
  * Recursively collect nodes and edges from children.
- * BlockGroup children are nested — their children become child nodes with parentId set.
+ * BlockGroup children are nested — tracked via groupMembership map.
  */
 function collectChildren(
   children: React.ReactNode,
   nodes: Node[],
   edges: Edge[],
-  parentId?: string
+  groupMembership: Map<string, string>,
+  currentGroupId?: string,
+  diagramEdgeType?: string,
 ) {
   Children.forEach(children, (child) => {
     if (!isValidElement(child)) return;
@@ -62,48 +74,47 @@ function collectChildren(
       type === BlockGroup ||
       (type as any)?.displayName === "BlockGroup"
     ) {
-      const groupNode: Node = {
+      nodes.push({
         id: props.id,
         type: "block-group",
         position: { x: 0, y: 0 },
         data: { label: props.label },
         style: { width: 250, height: 150 },
-      };
+        zIndex: -1,
+      });
 
-      if (parentId) {
-        groupNode.parentId = parentId;
-        groupNode.extent = "parent" as const;
+      if (currentGroupId) {
+        groupMembership.set(props.id, currentGroupId);
       }
 
-      nodes.push(groupNode);
-
-      // Recurse into group children
       if (props.children) {
-        collectChildren(props.children, nodes, edges, props.id);
+        collectChildren(props.children, nodes, edges, groupMembership, props.id, diagramEdgeType);
       }
     } else if (
       type === BlockNode ||
       (type as any)?.displayName === "BlockNode"
     ) {
-      const node: Node = {
+      nodes.push({
         id: props.id,
         type: "block",
         position: { x: 0, y: 0 },
         data: { label: props.label },
-      };
+      });
 
-      if (parentId) {
-        node.parentId = parentId;
-        node.extent = "parent" as const;
+      if (currentGroupId) {
+        groupMembership.set(props.id, currentGroupId);
       }
-
-      nodes.push(node);
     } else if (
-      (type as any)?.name === "Connection" ||
-      (props.from && props.to && !props.type)
+      type === Connection ||
+      (type as any)?.displayName === "Connection"
     ) {
-      edges.push({
-        id: `${props.from}-${props.to}`,
+      const isSelfLoop = props.from === props.to;
+      const resolvedType = isSelfLoop
+        ? "selfLoop"
+        : props.edgeType ?? diagramEdgeType;
+
+      const edge: Edge = {
+        id: `${props.from}-${props.to}-${edges.length}`,
         source: props.from,
         target: props.to,
         label: props.label,
@@ -111,9 +122,124 @@ function collectChildren(
         style: EDGE_STYLE,
         markerEnd: EDGE_MARKER,
         labelStyle: EDGE_LABEL_STYLE,
-      });
+      };
+
+      if (resolvedType && resolvedType !== "default") {
+        edge.type = resolvedType;
+      }
+
+      if (props.bidirectional) {
+        edge.markerStart = EDGE_MARKER_START;
+      }
+
+      edges.push(edge);
     }
   });
+}
+
+/**
+ * Layout hook using ELK compound layout.
+ * Groups are ELK parent nodes so ELK handles spacing and prevents overlap.
+ */
+function useBlockLayout(
+  direction: LayoutDirection,
+  groupMembership: Map<string, string>
+) {
+  const { setNodes, getNodes, getEdges, fitView } = useReactFlow();
+  const lastKeyRef = useRef("");
+  const layoutRunRef = useRef(0);
+
+  const groupIds = useMemo(
+    () => new Set(groupMembership.values()),
+    [groupMembership]
+  );
+
+  const measurementKey = useStore((s) => {
+    if (s.nodeLookup.size === 0) return "";
+    const parts: string[] = [];
+    let allMeasured = true;
+    for (const [id, node] of s.nodeLookup) {
+      if (groupIds.has(id)) continue;
+      const w = node.measured?.width;
+      const h = node.measured?.height;
+      if (!w || !h) { allMeasured = false; break; }
+      parts.push(`${id}:${w}x${h}`);
+    }
+    return allMeasured ? parts.join(",") : "";
+  });
+
+  const edgeKey = useStore((s) =>
+    s.edges.map((e) => `${e.source}-${e.target}`).join(",")
+  );
+
+  useEffect(() => {
+    if (!measurementKey) return;
+
+    const key = `${measurementKey}|${edgeKey}|${direction}`;
+    if (key === lastKeyRef.current) return;
+    lastKeyRef.current = key;
+
+    const run = ++layoutRunRef.current;
+    const currentNodes = getNodes();
+    const currentEdges = getEdges();
+
+    const sirenNodes = currentNodes.map((node) => ({
+      id: node.id,
+      width: node.measured?.width ?? (node.style?.width as number) ?? node.width ?? 100,
+      height: node.measured?.height ?? (node.style?.height as number) ?? node.height ?? 40,
+      parentId: groupMembership.get(node.id),
+    }));
+
+    const sirenEdges = currentEdges.map((edge) => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+    }));
+
+    layoutGraph({ nodes: sirenNodes, edges: sirenEdges, direction })
+      .then((result) => {
+        if (run !== layoutRunRef.current) return;
+
+        const posById = new Map(result.nodes.map((n) => [n.id, n]));
+
+        setNodes((prev) =>
+          prev.map((node) => {
+            const laid = posById.get(node.id);
+            if (!laid) return node;
+
+            if (groupIds.has(node.id)) {
+              return {
+                ...node,
+                position: { x: laid.x, y: laid.y },
+                style: {
+                  ...node.style,
+                  width: laid.width,
+                  height: laid.height,
+                },
+              };
+            }
+
+            return { ...node, position: { x: laid.x, y: laid.y } };
+          })
+        );
+
+        fitView({ padding: 0.2, duration: 200 });
+      })
+      .catch((err) => {
+        console.error("[siren] Layout failed:", err);
+      });
+  }, [measurementKey, edgeKey, direction, getNodes, getEdges, setNodes, fitView, groupIds, groupMembership]);
+}
+
+function BlockLayoutRunner({
+  direction,
+  groupMembership,
+}: {
+  direction: LayoutDirection;
+  groupMembership: Map<string, string>;
+}) {
+  useBlockLayout(direction, groupMembership);
+  return null;
 }
 
 function BlockDiagramInner({
@@ -121,33 +247,50 @@ function BlockDiagramInner({
   children,
   className,
   style,
+  edgeType: diagramEdgeType,
+  interactive,
 }: Omit<BlockDiagramProps, "theme">) {
-  const { nodes, edges } = useMemo(() => {
+  const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
+  const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const prevKeyRef = useRef("");
+
+  const { nodes, edges, groupMembership } = useMemo(() => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
-    collectChildren(children, nodes, edges);
-    return { nodes, edges };
-  }, [children]);
+    const groupMembership = new Map<string, string>();
+    collectChildren(children, nodes, edges, groupMembership, undefined, diagramEdgeType);
+    return { nodes, edges, groupMembership };
+  }, [children, diagramEdgeType]);
+
+  useEffect(() => {
+    const key = nodes.map((n) => n.id).join(",") + "|" + edges.map((e) => e.id).join(",");
+    if (key === prevKeyRef.current) return;
+    prevKeyRef.current = key;
+    setRfNodes(nodes);
+    setRfEdges(edges);
+  }, [nodes, edges, setRfNodes, setRfEdges]);
 
   return (
     <div
       className={className}
-      style={{ width: "100%", height: "100%", ...style }}
+      style={style ? { ...DEFAULT_WRAPPER_STYLE, ...style } : DEFAULT_WRAPPER_STYLE}
     >
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={rfNodes}
+        edges={rfEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         fitView
         proOptions={PRO_OPTIONS}
-        nodesDraggable={false}
+        nodesDraggable={interactive ?? false}
         nodesConnectable={false}
-        elementsSelectable={false}
-        onlyRenderVisibleElements
+        elementsSelectable={interactive ?? false}
         minZoom={0.3}
         maxZoom={2}
       >
-        <LayoutRunner direction={direction} />
+        <BlockLayoutRunner direction={direction} groupMembership={groupMembership} />
         <Background
           variant={BackgroundVariant.Dots}
           gap={16}
@@ -160,11 +303,20 @@ function BlockDiagramInner({
   );
 }
 
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = React.useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return <>{children}</>;
+}
+
 export function BlockDiagram({ theme, ...props }: BlockDiagramProps) {
   const inner = (
-    <ReactFlowProvider>
-      <BlockDiagramInner {...props} />
-    </ReactFlowProvider>
+    <ClientOnly>
+      <ReactFlowProvider>
+        <BlockDiagramInner {...props} />
+      </ReactFlowProvider>
+    </ClientOnly>
   );
 
   if (theme) {

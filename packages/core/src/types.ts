@@ -24,6 +24,8 @@ export interface SirenGraph {
   spacing?: {
     node?: number;
     layer?: number;
+    edge?: number;
+    edgeNode?: number;
   };
 }
 

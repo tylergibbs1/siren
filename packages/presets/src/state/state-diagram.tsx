@@ -1,9 +1,11 @@
 "use client";
 
-import React, { Children, isValidElement, useMemo } from "react";
+import React, { Children, isValidElement, useEffect, useRef, useMemo } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
   Background,
   BackgroundVariant,
   Controls,
@@ -17,13 +19,17 @@ import { useAutoLayout } from "@siren/react";
 import { StateNode } from "./state-node";
 import { StateInitial } from "./state-initial";
 import { StateFinal } from "./state-final";
+import { Transition } from "./transition";
 import {
   EDGE_STYLE,
   EDGE_DASHED_STYLE,
   EDGE_MARKER,
+  EDGE_MARKER_START,
   EDGE_LABEL_STYLE,
   PRO_OPTIONS,
 } from "../shared/edge-styles";
+import { AnimatedEdge } from "../shared/animated-edge";
+import { SelfLoopEdge } from "../shared/self-loop-edge";
 
 function LayoutRunner({ direction }: { direction: LayoutDirection }) {
   useAutoLayout(direction);
@@ -36,6 +42,8 @@ interface StateDiagramProps {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  edgeType?: string;
+  interactive?: boolean;
 }
 
 // Hoisted module-level — React Flow docs: "define nodeTypes outside of the component"
@@ -45,12 +53,23 @@ const nodeTypes = {
   "state-final": StateFinal,
 };
 
+// Hoisted module-level — React Flow docs: "define edgeTypes outside of the component"
+const edgeTypes = { animated: AnimatedEdge, selfLoop: SelfLoopEdge };
+
+const DEFAULT_WRAPPER_STYLE = { width: "100%", height: "100%" };
+
 function StateDiagramInner({
   direction = "TB",
   children,
   className,
   style,
+  edgeType: diagramEdgeType,
+  interactive,
 }: Omit<StateDiagramProps, "theme">) {
+  const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
+  const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const prevKeyRef = useRef("");
+
   const { nodes, edges } = useMemo(() => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
@@ -95,8 +114,8 @@ function StateDiagramInner({
           data: { label: props.label },
         });
       } else if (
-        (type as any)?.name === "Transition" ||
-        props.from
+        type === Transition ||
+        (type as any)?.displayName === "Transition"
       ) {
         const guardLabel = props.guard
           ? props.label
@@ -104,8 +123,13 @@ function StateDiagramInner({
             : `[${props.guard}]`
           : props.label;
 
-        edges.push({
-          id: `${props.from}-${props.to}`,
+        const isSelfLoop = props.from === props.to;
+        const resolvedType = isSelfLoop
+          ? "selfLoop"
+          : props.edgeType ?? diagramEdgeType;
+
+        const edge: Edge = {
+          id: `${props.from}-${props.to}-${edges.length}`,
           source: props.from,
           target: props.to,
           label: guardLabel,
@@ -113,28 +137,48 @@ function StateDiagramInner({
           style: EDGE_STYLE,
           markerEnd: EDGE_MARKER,
           labelStyle: EDGE_LABEL_STYLE,
-        });
+        };
+
+        if (resolvedType && resolvedType !== "default") {
+          edge.type = resolvedType;
+        }
+
+        if (props.bidirectional) {
+          edge.markerStart = EDGE_MARKER_START;
+        }
+
+        edges.push(edge);
       }
     });
 
     return { nodes, edges };
-  }, [children]);
+  }, [children, diagramEdgeType]);
+
+  useEffect(() => {
+    const key = nodes.map((n) => n.id).join(",") + "|" + edges.map((e) => e.id).join(",");
+    if (key === prevKeyRef.current) return;
+    prevKeyRef.current = key;
+    setRfNodes(nodes);
+    setRfEdges(edges);
+  }, [nodes, edges, setRfNodes, setRfEdges]);
 
   return (
     <div
       className={className}
-      style={{ width: "100%", height: "100%", ...style }}
+      style={style ? { ...DEFAULT_WRAPPER_STYLE, ...style } : DEFAULT_WRAPPER_STYLE}
     >
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={rfNodes}
+        edges={rfEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         fitView
         proOptions={PRO_OPTIONS}
-        nodesDraggable={false}
+        nodesDraggable={interactive ?? false}
         nodesConnectable={false}
-        elementsSelectable={false}
-        onlyRenderVisibleElements
+        elementsSelectable={interactive ?? false}
         minZoom={0.3}
         maxZoom={2}
       >
@@ -151,11 +195,20 @@ function StateDiagramInner({
   );
 }
 
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = React.useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return <>{children}</>;
+}
+
 export function StateDiagram({ theme, ...props }: StateDiagramProps) {
   const inner = (
-    <ReactFlowProvider>
-      <StateDiagramInner {...props} />
-    </ReactFlowProvider>
+    <ClientOnly>
+      <ReactFlowProvider>
+        <StateDiagramInner {...props} />
+      </ReactFlowProvider>
+    </ClientOnly>
   );
 
   if (theme) {

@@ -1,79 +1,84 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import {
-  useReactFlow,
-  useNodesInitialized,
-  useStore,
-} from "@xyflow/react";
+import { useReactFlow, useStore } from "@xyflow/react";
 import { layoutGraph } from "@siren/core";
 import type { LayoutDirection } from "@siren/core";
 
 /**
  * Runs ELK layout once nodes are measured by React Flow.
- * Listens to the node/edge arrays from the store and re-layouts
- * when they change structurally (by id set).
+ *
+ * Reads measured dimensions from React Flow's internal nodeLookup,
+ * which is populated via onNodesChange in controlled mode.
  */
 export function useAutoLayout(direction: LayoutDirection = "TB") {
-  const { setNodes, fitView } = useReactFlow();
-  const nodesInitialized = useNodesInitialized();
+  const { setNodes, getNodes, getEdges, fitView } = useReactFlow();
   const layoutRunRef = useRef(0);
   const lastKeyRef = useRef("");
 
-  // Pull live nodes/edges from the store
-  const nodes = useStore((s) => s.nodes);
-  const edges = useStore((s) => s.edges);
+  // Build a measurement key — returns "" when nodes aren't ready yet
+  const measurementKey = useStore((s) => {
+    if (s.nodeLookup.size === 0) return "";
+    const parts: string[] = [];
+    for (const [id, node] of s.nodeLookup) {
+      const w = node.measured?.width;
+      const h = node.measured?.height;
+      if (!w || !h) return "";
+      parts.push(`${id}:${w}x${h}`);
+    }
+    return parts.join(",");
+  });
+
+  const edgeKey = useStore((s) =>
+    s.edges
+      .filter((e) => !e.data?.layoutIgnore)
+      .map((e) => `${e.source}-${e.target}`)
+      .join(",")
+  );
 
   useEffect(() => {
-    if (!nodesInitialized || nodes.length === 0) return;
+    if (!measurementKey) return;
 
-    // Build a key from node IDs + edge source/target to detect structural changes
-    const key = [
-      nodes.map((n) => n.id).join(","),
-      edges.map((e) => `${e.source}-${e.target}`).join(","),
-      direction,
-    ].join("|");
-
+    const key = `${measurementKey}|${edgeKey}|${direction}`;
     if (key === lastKeyRef.current) return;
     lastKeyRef.current = key;
 
     const run = ++layoutRunRef.current;
+    const currentNodes = getNodes();
+    const currentEdges = getEdges().filter((e) => !e.data?.layoutIgnore);
 
-    const sirenNodes = nodes.map((n) => ({
-      id: n.id,
-      width: n.measured?.width ?? 180,
-      height: n.measured?.height ?? 60,
-      parentId: n.parentId,
-      layoutOptions: n.data?.layoutOptions as Record<string, string | number> | undefined,
+    const sirenNodes = currentNodes.map((node) => ({
+      id: node.id,
+      width: node.measured?.width ?? node.width ?? 100,
+      height: node.measured?.height ?? node.height ?? 40,
+      layoutOptions: node.data?.layoutOptions as Record<string, string | number> | undefined,
     }));
 
-    const sirenEdges = edges.map((e) => ({
-      id: e.id,
-      source: e.source,
-      target: e.target,
+    const sirenEdges = currentEdges.map((edge) => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
     }));
 
-    layoutGraph({
-      nodes: sirenNodes,
-      edges: sirenEdges,
-      direction,
-    }).then((result) => {
-      if (run !== layoutRunRef.current) return;
+    layoutGraph({ nodes: sirenNodes, edges: sirenEdges, direction })
+      .then((result) => {
+        if (run !== layoutRunRef.current) return;
+        const resultById = new Map(
+          result.nodes.map((node) => [node.id, { x: node.x, y: node.y }])
+        );
 
-      setNodes((prev) =>
-        prev.map((node) => {
-          const laid = result.nodes.find((n) => n.id === node.id);
-          if (!laid) return node;
-          return {
-            ...node,
-            position: { x: laid.x, y: laid.y },
-          };
-        })
-      );
+        setNodes((prev) =>
+          prev.map((node) => {
+            const laid = resultById.get(node.id);
+            if (!laid) return node;
+            return { ...node, position: { x: laid.x, y: laid.y } };
+          })
+        );
 
-      requestAnimationFrame(() => {
         fitView({ padding: 0.2, duration: 200 });
+      })
+      .catch((err) => {
+        console.error("[siren] Layout failed:", err);
       });
-    });
-  }, [nodesInitialized, nodes, edges, direction, setNodes, fitView]);
+  }, [measurementKey, edgeKey, direction, getNodes, getEdges, setNodes, fitView]);
 }

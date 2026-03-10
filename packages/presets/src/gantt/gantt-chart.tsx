@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
   Background,
   BackgroundVariant,
   Controls,
@@ -64,6 +66,10 @@ function GanttChartInner({
   className,
   style,
 }: Omit<GanttChartProps, "theme">) {
+  const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
+  const [rfEdges, , onEdgesChange] = useEdgesState<Edge>([]);
+  const prevKeyRef = useRef("");
+
   const { nodes } = useMemo(() => {
     const PIXELS_PER_DAY = 12;
     const ROW_HEIGHT = 40;
@@ -167,14 +173,23 @@ function GanttChartInner({
     return { nodes };
   }, [title, sections]);
 
+  useEffect(() => {
+    const key = nodes.map((n) => n.id).join(",");
+    if (key === prevKeyRef.current) return;
+    prevKeyRef.current = key;
+    setRfNodes(nodes);
+  }, [nodes, setRfNodes]);
+
   return (
     <div
       className={className}
       style={{ width: "100%", height: "100%", ...style }}
     >
       <ReactFlow
-        nodes={nodes}
-        edges={[]}
+        nodes={rfNodes}
+        edges={rfEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
         proOptions={PRO_OPTIONS}

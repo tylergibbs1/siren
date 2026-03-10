@@ -14,6 +14,14 @@ export const EDGE_MARKER = {
   type: MarkerType.ArrowClosed,
   color: "var(--siren-edge, hsl(0 0% 40%))",
 };
+export const EDGE_MARKER_START = {
+  type: MarkerType.ArrowClosed,
+  color: "var(--siren-edge, hsl(0 0% 40%))",
+};
+export const EDGE_ANIMATED_CIRCLE = {
+  r: 3,
+  fill: "var(--siren-edge, hsl(0 0% 40%))",
+};
 export const EDGE_LABEL_STYLE = {
   fontFamily: "var(--siren-font-mono, monospace)",
   fontSize: 11,

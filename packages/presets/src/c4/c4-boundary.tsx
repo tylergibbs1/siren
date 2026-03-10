@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
+import { HIDDEN_HANDLE_STYLE } from "../shared/edge-styles";
 
 export type C4BoundaryData = {
   label: string;
@@ -15,7 +16,7 @@ function C4BoundaryComponent({ data }: NodeProps<C4BoundaryNode>) {
       <Handle
         type="target"
         position={Position.Top}
-        style={{ visibility: "hidden" }}
+        style={HIDDEN_HANDLE_STYLE}
       />
       <div
         style={{
@@ -47,7 +48,7 @@ function C4BoundaryComponent({ data }: NodeProps<C4BoundaryNode>) {
       <Handle
         type="source"
         position={Position.Bottom}
-        style={{ visibility: "hidden" }}
+        style={HIDDEN_HANDLE_STYLE}
       />
     </>
   );

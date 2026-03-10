@@ -1,10 +1,13 @@
 "use client";
 
-import React, { Children, isValidElement, useMemo } from "react";
+import React, { Children, isValidElement, useEffect, useRef, useMemo } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
   type Node,
+  type Edge,
 } from "@xyflow/react";
 import { SirenProvider } from "@siren/themes";
 import type { SirenTheme } from "@siren/themes";
@@ -268,6 +271,10 @@ function QuadrantChartInner({
   className,
   style,
 }: Omit<QuadrantChartProps, "theme">) {
+  const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
+  const [rfEdges, , onEdgesChange] = useEdgesState<Edge>([]);
+  const prevKeyRef = useRef("");
+
   const nodes = useMemo(() => {
     const nodes: Node[] = [];
 
@@ -301,14 +308,23 @@ function QuadrantChartInner({
     return nodes;
   }, [children]);
 
+  useEffect(() => {
+    const key = nodes.map((n) => n.id).join(",");
+    if (key === prevKeyRef.current) return;
+    prevKeyRef.current = key;
+    setRfNodes(nodes);
+  }, [nodes, setRfNodes]);
+
   return (
     <div
       className={className}
       style={{ width: "100%", height: "100%", position: "relative", ...style }}
     >
       <ReactFlow
-        nodes={nodes}
-        edges={[]}
+        nodes={rfNodes}
+        edges={rfEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{ padding: 0.2 }}

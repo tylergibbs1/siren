@@ -1,9 +1,11 @@
 "use client";
 
-import React, { Children, isValidElement, useMemo } from "react";
+import React, { Children, isValidElement, useEffect, useRef, useMemo } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
   Background,
   BackgroundVariant,
   type Node,
@@ -32,6 +34,10 @@ function KanbanInner({
   className,
   style,
 }: Omit<KanbanProps, "theme">) {
+  const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
+  const [rfEdges, , onEdgesChange] = useEdgesState<Edge>([]);
+  const prevKeyRef = useRef("");
+
   const { nodes } = useMemo(() => {
     const columns: Array<{
       id: string;
@@ -87,11 +93,13 @@ function KanbanInner({
         cardCount * (cardHeight + cardGap) +
         colPadding;
 
-      // Column group node
+      const colX = colIdx * (colWidth + colGap);
+
+      // Column group node — flat layout with zIndex: -1
       nodes.push({
         id: col.id,
         type: "kanban-column",
-        position: { x: colIdx * (colWidth + colGap), y: 0 },
+        position: { x: colX, y: 0 },
         data: {
           label: col.label,
           count: cardCount,
@@ -100,19 +108,18 @@ function KanbanInner({
           width: colWidth,
           height: Math.max(colHeight, 200),
         },
+        zIndex: -1,
       });
 
-      // Card nodes inside column
+      // Card nodes — absolute positions (no parentId)
       col.cards.forEach((card, cardIdx) => {
         nodes.push({
           id: card.id,
           type: "kanban-card",
           position: {
-            x: colPadding,
+            x: colX + colPadding,
             y: headerHeight + colPadding + cardIdx * (cardHeight + cardGap),
           },
-          parentId: col.id,
-          extent: "parent" as const,
           data: {
             label: card.label,
             tag: card.tag,
@@ -128,21 +135,29 @@ function KanbanInner({
     return { nodes, edges };
   }, [children]);
 
+  useEffect(() => {
+    const key = nodes.map((n) => n.id).join(",");
+    if (key === prevKeyRef.current) return;
+    prevKeyRef.current = key;
+    setRfNodes(nodes);
+  }, [nodes, setRfNodes]);
+
   return (
     <div
       className={className}
       style={{ width: "100%", height: "100%", ...style }}
     >
       <ReactFlow
-        nodes={nodes}
-        edges={[]}
+        nodes={rfNodes}
+        edges={rfEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
         proOptions={PRO_OPTIONS}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
-        onlyRenderVisibleElements
         minZoom={0.3}
         maxZoom={2}
       >

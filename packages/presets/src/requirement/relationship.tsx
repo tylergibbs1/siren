@@ -17,6 +17,8 @@ export function Relationship(_props: {
   from: string;
   to: string;
   type: RelationshipType;
+  edgeType?: string;
+  bidirectional?: boolean;
 }) {
   return null;
 }

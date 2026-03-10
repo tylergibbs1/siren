@@ -13,3 +13,5 @@ export function Message(_props: {
 }) {
   return null;
 }
+
+Message.displayName = "Message";

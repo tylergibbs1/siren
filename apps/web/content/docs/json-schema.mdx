@@ -1,0 +1,67 @@
+---
+title: JSON Schema
+description: Validate Siren documents with the canonical JSON schema and runtime validator.
+---
+
+Siren is JSON-first. The canonical Siren document is a typed JSON object, not a custom DSL.
+
+That gives you two core tools:
+
+- `validate()` for runtime validation and typed error messages
+- `sirenJsonSchema` for editor tooling and schema-aware integrations
+
+## Runtime validation
+
+```ts
+import { validate } from "@siren/schema";
+
+const document = {
+  type: "flowchart",
+  direction: "TB",
+  nodes: [
+    { id: "start", label: "Start" },
+    { id: "review", label: "Review", shape: "diamond" },
+    { id: "done", label: "Done", variant: "success" }
+  ],
+  edges: [
+    { from: "start", to: "review" },
+    { from: "review", to: "done", label: "approved" }
+  ]
+};
+
+const result = validate(document);
+
+if (!result.valid) {
+  console.error(result.errors);
+} else {
+  console.log(result.data.type);
+}
+```
+
+`validate()` should run before rendering whenever the source comes from a user, file, API, or LLM.
+
+## Canonical schema export
+
+```ts
+import { sirenJsonSchema } from "@siren/schema";
+```
+
+Use `sirenJsonSchema` when you want editor autocomplete, JSON Schema validation, or machine-readable docs for the full Siren format.
+
+## Why this matters
+
+Mermaid makes you trust a parser.
+
+Siren makes you validate structured data first, then render it. That gives you:
+
+- better errors
+- better AI generation
+- better visual-editor round-tripping
+- better integration with existing JSON tooling
+
+## Recommended flow
+
+1. Create or receive a Siren JSON document.
+2. Run `validate()`.
+3. If valid, render it with `fromJSON()`.
+4. If invalid, show or log the returned errors.

@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
+import { HIDDEN_HANDLE_STYLE } from "../shared/edge-styles";
 
 export type BlockGroupData = {
   label: string;
@@ -15,7 +16,7 @@ function BlockGroupComponent({ data }: NodeProps<BlockGroupType>) {
       <Handle
         type="target"
         position={Position.Top}
-        style={{ visibility: "hidden" }}
+        style={HIDDEN_HANDLE_STYLE}
       />
       <div
         style={{
@@ -49,7 +50,7 @@ function BlockGroupComponent({ data }: NodeProps<BlockGroupType>) {
       <Handle
         type="source"
         position={Position.Bottom}
-        style={{ visibility: "hidden" }}
+        style={HIDDEN_HANDLE_STYLE}
       />
     </>
   );
