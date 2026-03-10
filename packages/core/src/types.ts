@@ -27,6 +27,8 @@ export interface SirenGraph {
     edge?: number;
     edgeNode?: number;
   };
+  /** Extra ELK layout options merged into the graph-level config */
+  layoutOptions?: Record<string, string | number>;
 }
 
 export interface LayoutResult {

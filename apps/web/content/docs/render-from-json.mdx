@@ -54,6 +54,20 @@ export function Diagram({ input }: { input: unknown }) {
 }
 ```
 
+## Theming
+
+Wrap diagrams in `SirenProvider` to apply a color theme:
+
+```tsx
+import { SirenProvider, themes } from "@siren/themes";
+
+<SirenProvider theme={themes.github}>
+  {fromJSON(result.data)}
+</SirenProvider>
+```
+
+See the [Theming](/docs/theming) page for all built-in themes and custom theme creation.
+
 ## When to use preset components directly
 
 Use direct preset components when you are hand-authoring diagrams in React and want maximum control over component composition.

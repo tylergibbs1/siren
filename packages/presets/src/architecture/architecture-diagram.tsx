@@ -24,10 +24,18 @@ import {
   EDGE_MARKER,
   EDGE_MARKER_START,
   EDGE_LABEL_STYLE,
+  EDGE_LABEL_BG_STYLE,
   PRO_OPTIONS,
 } from "../shared/edge-styles";
 import { AnimatedEdge } from "../shared/animated-edge";
 import { SelfLoopEdge } from "../shared/self-loop-edge";
+
+const directionToElk: Record<string, string> = {
+  TB: "DOWN",
+  BT: "UP",
+  LR: "RIGHT",
+  RL: "LEFT",
+};
 
 interface ArchitectureDiagramProps {
   direction?: LayoutDirection;
@@ -36,7 +44,8 @@ interface ArchitectureDiagramProps {
   className?: string;
   style?: React.CSSProperties;
   edgeType?: string;
-  interactive?: boolean;
+  mode?: "static" | "interactive";
+  ariaLabel?: string;
 }
 
 const nodeTypes = {
@@ -63,11 +72,14 @@ function collectChildren(
     const props = child.props as Record<string, any>;
 
     if (type === ArchGroup || (type as any)?.displayName === "ArchGroup") {
+      const groupLayoutOptions = props.direction
+        ? { "elk.direction": directionToElk[props.direction] }
+        : undefined;
       nodes.push({
         id: props.id,
         type: "arch-group",
         position: { x: 0, y: 0 },
-        data: { label: props.label, icon: props.icon },
+        data: { label: props.label, icon: props.icon, layoutOptions: groupLayoutOptions },
         style: { width: 260, height: 160 },
         zIndex: -1,
       });
@@ -99,6 +111,7 @@ function collectChildren(
         style: EDGE_STYLE,
         markerEnd: EDGE_MARKER,
         labelStyle: EDGE_LABEL_STYLE,
+        labelBgStyle: EDGE_LABEL_BG_STYLE,
       };
 
       if (resolvedType && resolvedType !== "default") {
@@ -131,7 +144,8 @@ function ArchitectureDiagramInner({
   className,
   style,
   edgeType: diagramEdgeType,
-  interactive,
+  mode,
+  ariaLabel,
 }: Omit<ArchitectureDiagramProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -167,11 +181,14 @@ function ArchitectureDiagramInner({
         edgeTypes={edgeTypes}
         fitView
         proOptions={PRO_OPTIONS}
-        nodesDraggable={interactive ?? false}
+        nodesDraggable={mode === "interactive"}
         nodesConnectable={false}
-        elementsSelectable={interactive ?? false}
+        elementsSelectable={mode === "interactive"}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="architecture diagram"
+        aria-label={ariaLabel ?? "Architecture diagram"}
       >
         <ArchLayoutRunner direction={direction} groupMembership={groupMembership} />
         <Background

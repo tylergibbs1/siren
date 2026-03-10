@@ -21,6 +21,7 @@ interface TimelineProps {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  ariaLabel?: string;
 }
 
 const nodeTypes = {
@@ -31,6 +32,7 @@ function TimelineInner({
   children,
   className,
   style,
+  ariaLabel,
 }: Omit<TimelineProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -126,6 +128,9 @@ function TimelineInner({
         elementsSelectable={false}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="timeline"
+        aria-label={ariaLabel ?? "Timeline"}
       >
         <Background
           variant={BackgroundVariant.Dots}

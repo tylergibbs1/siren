@@ -169,6 +169,7 @@ export interface C4Schema {
     label: string;
     type: "person" | "system" | "boundary";
     description?: string;
+    direction?: "TB" | "BT" | "LR" | "RL";
     children?: Array<{
       id: string;
       label: string;
@@ -194,6 +195,7 @@ export interface ArchitectureSchema {
     id: string;
     label: string;
     icon?: string;
+    direction?: "TB" | "BT" | "LR" | "RL";
     services: Array<{
       id: string;
       label: string;
@@ -222,6 +224,7 @@ export interface BlockSchema {
   blocks: Array<{
     id: string;
     label: string;
+    direction?: "TB" | "BT" | "LR" | "RL";
     children?: Array<{
       id: string;
       label: string;

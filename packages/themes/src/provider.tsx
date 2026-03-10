@@ -20,6 +20,8 @@ export function SirenProvider({
   const cssVars = useMemo(
     () =>
       ({
+        width: "100%",
+        height: "100%",
         "--siren-bg": theme.colors.background,
         "--siren-surface": theme.colors.surface,
         "--siren-surface-raised": theme.colors.surfaceRaised,

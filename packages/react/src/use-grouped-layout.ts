@@ -69,6 +69,9 @@ export function useGroupedLayout(
         node.height ??
         40,
       parentId: groupMembership.get(node.id),
+      ...(node.data?.layoutOptions
+        ? { layoutOptions: node.data.layoutOptions as Record<string, string | number> }
+        : {}),
     }));
 
     const sirenEdges = currentEdges.map((edge) => ({

@@ -1,0 +1,82 @@
+---
+title: Theming
+description: Make diagrams match your app's look and feel.
+---
+
+Siren diagrams inherit your app's colors automatically if you use [tweakcn](https://tweakcn.com) or [shadcn/ui](https://ui.shadcn.com). Otherwise, pick a built-in preset or pass your own colors.
+
+## Option 1 — tweakcn / shadcn (zero config)
+
+If your app already defines CSS variables like `--background`, `--foreground`, `--primary`, add one import:
+
+```css
+@import "@siren/themes/tweakcn.css";
+```
+
+Done. Diagrams inherit your light/dark mode automatically. No wrapper component needed.
+
+### Variable mapping
+
+| Diagram token | Your CSS variable |
+| --- | --- |
+| `--siren-bg` | `--background` |
+| `--siren-surface` | `--secondary` |
+| `--siren-node` | `--card` |
+| `--siren-node-border` | `--border` |
+| `--siren-edge` | `--muted-foreground` |
+| `--siren-text` | `--foreground` |
+| `--siren-primary` | `--primary` |
+| `--siren-danger` | `--destructive` |
+| `--siren-radius` | `--radius` |
+
+## Option 2 — Built-in presets
+
+Four presets ship with Siren:
+
+| Preset | Look |
+| --- | --- |
+| `dark` | Achromatic grays, code-editor feel (default) |
+| `light` | Near-white backgrounds |
+| `github` | GitHub's UI palette |
+| `presentation` | Deep dark + indigo accent, good for slides |
+
+```tsx
+import { SirenProvider, themes } from "@siren/themes";
+
+<SirenProvider theme={themes.github}>
+  {fromJSON(result.data)}
+</SirenProvider>
+```
+
+## Option 3 — Custom colors
+
+Pass any colors you want:
+
+```tsx
+<SirenProvider theme={{
+  colors: {
+    background: "#1a1a2e",
+    surface: "#16213e",
+    surfaceRaised: "#0f3460",
+    node: "#0f3460",
+    nodeBorder: "#1a5276",
+    borderStrong: "#2980b9",
+    edge: "#5dade2",
+    text: "#ecf0f1",
+    textMuted: "#bdc3c7",
+    textSubtle: "#95a5a6",
+    primary: "#e94560",
+    primaryMuted: "#2d1f2f",
+    success: "#27ae60",
+    warning: "#f39c12",
+    danger: "#e74c3c",
+  },
+  radius: "8px",
+  fontFamily: "Inter, system-ui, sans-serif",
+  fontMono: "'JetBrains Mono', monospace",
+}}>
+  {fromJSON(result.data)}
+</SirenProvider>
+```
+
+All values are injected as `--siren-*` CSS custom properties and cascade into nested diagrams.

@@ -67,7 +67,7 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
     case "flowchart":
       return (
         <div style={FILL_STYLE}>
-          <Flowchart direction={schema.direction} edgeType={schema.edgeType} interactive={schema.interactive}>
+          <Flowchart direction={schema.direction} edgeType={schema.edgeType} mode={schema.interactive ? "interactive" : undefined}>
             {schema.nodes.map((node) =>
               node.shape === "diamond"
                 ? el(Decision, { key: node.id, id: node.id, label: node.label })
@@ -118,7 +118,7 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
     case "state":
       return (
         <div style={FILL_STYLE}>
-          <StateDiagram direction={schema.direction} edgeType={schema.edgeType} interactive={schema.interactive}>
+          <StateDiagram direction={schema.direction} edgeType={schema.edgeType} mode={schema.interactive ? "interactive" : undefined}>
             {schema.states.map((state) => {
               if (state.initial) return el(StateInitial, { key: state.id, id: state.id });
               if (state.final) return el(StateFinal, { key: state.id, id: state.id });
@@ -147,7 +147,7 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
     case "class":
       return (
         <div style={FILL_STYLE}>
-          <ClassDiagram direction={schema.direction} edgeType={schema.edgeType} interactive={schema.interactive}>
+          <ClassDiagram direction={schema.direction} edgeType={schema.edgeType} mode={schema.interactive ? "interactive" : undefined}>
             {schema.classes.map((item) =>
               el(ClassNode, {
                 key: item.id,
@@ -175,7 +175,7 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
     case "er":
       return (
         <div style={FILL_STYLE}>
-          <ERDiagram direction={schema.direction} edgeType={schema.edgeType} interactive={schema.interactive}>
+          <ERDiagram direction={schema.direction} edgeType={schema.edgeType} mode={schema.interactive ? "interactive" : undefined}>
             {schema.entities.map((entity) =>
               el(EREntity, {
                 key: entity.id,
@@ -281,7 +281,7 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
     case "c4":
       return (
         <div style={FILL_STYLE}>
-          <C4Diagram direction={schema.direction} edgeType={schema.edgeType} interactive={schema.interactive}>
+          <C4Diagram direction={schema.direction} edgeType={schema.edgeType} mode={schema.interactive ? "interactive" : undefined}>
             {schema.elements.map((element) => {
               if (element.type === "person") {
                 return el(C4Person, {
@@ -295,7 +295,7 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
               if (element.type === "boundary") {
                 return el(
                   C4Boundary,
-                  { key: element.id, id: element.id, label: element.label },
+                  { key: element.id, id: element.id, label: element.label, direction: element.direction },
                   element.children?.map((child) => {
                     if (child.type === "person") {
                       return el(C4Person, {
@@ -340,11 +340,11 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
     case "architecture":
       return (
         <div style={FILL_STYLE}>
-          <ArchitectureDiagram direction={schema.direction} edgeType={schema.edgeType} interactive={schema.interactive}>
+          <ArchitectureDiagram direction={schema.direction} edgeType={schema.edgeType} mode={schema.interactive ? "interactive" : undefined}>
             {schema.groups.map((group) =>
               el(
                 ArchGroup,
-                { key: group.id, id: group.id, label: group.label, icon: group.icon },
+                { key: group.id, id: group.id, label: group.label, icon: group.icon, direction: group.direction },
                 group.services.map((service) =>
                   el(ArchService, {
                     key: service.id,
@@ -380,12 +380,12 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
     case "block":
       return (
         <div style={FILL_STYLE}>
-          <BlockDiagram direction={schema.direction} edgeType={schema.edgeType} interactive={schema.interactive}>
+          <BlockDiagram direction={schema.direction} edgeType={schema.edgeType} mode={schema.interactive ? "interactive" : undefined}>
             {schema.blocks.map((block) => {
               if (block.children && block.children.length > 0) {
                 return el(
                   BlockGroup,
-                  { key: block.id, id: block.id, label: block.label },
+                  { key: block.id, id: block.id, label: block.label, direction: block.direction },
                   block.children.map((child) =>
                     el(BlockNode, { key: child.id, id: child.id, label: child.label })
                   )
@@ -411,7 +411,7 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
     case "requirement":
       return (
         <div style={FILL_STYLE}>
-          <RequirementDiagram direction={schema.direction} edgeType={schema.edgeType} interactive={schema.interactive}>
+          <RequirementDiagram direction={schema.direction} edgeType={schema.edgeType} mode={schema.interactive ? "interactive" : undefined}>
             {schema.requirements.map((requirement) =>
               el(RequirementNode, {
                 key: requirement.id,

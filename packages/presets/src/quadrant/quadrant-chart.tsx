@@ -27,6 +27,7 @@ interface QuadrantChartProps {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  ariaLabel?: string;
 }
 
 const nodeTypes = {
@@ -270,6 +271,7 @@ function QuadrantChartInner({
   children,
   className,
   style,
+  ariaLabel,
 }: Omit<QuadrantChartProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, , onEdgesChange] = useEdgesState<Edge>([]);
@@ -334,6 +336,9 @@ function QuadrantChartInner({
         elementsSelectable={false}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="quadrant chart"
+        aria-label={ariaLabel ?? "Quadrant chart"}
       >
         <QuadrantBackground
           quadrants={quadrants}

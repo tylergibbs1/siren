@@ -1,8 +1,18 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import { BaseEdge, getBezierPath, type EdgeProps } from "@xyflow/react";
 import { EDGE_STYLE } from "./edge-styles";
+
+// Module-level style injection — only inject once
+let styleInjected = false;
+function injectKeyframes() {
+  if (styleInjected || typeof document === "undefined") return;
+  styleInjected = true;
+  const style = document.createElement("style");
+  style.textContent = `@keyframes siren-dash { to { stroke-dashoffset: 0; } }`;
+  document.head.appendChild(style);
+}
 
 function AnimatedEdgeComponent({
   sourceX,
@@ -15,6 +25,10 @@ function AnimatedEdgeComponent({
   markerEnd,
   markerStart,
 }: EdgeProps) {
+  useEffect(() => {
+    injectKeyframes();
+  }, []);
+
   const [edgePath] = getBezierPath({
     sourceX,
     sourceY,
@@ -28,7 +42,14 @@ function AnimatedEdgeComponent({
     <>
       <BaseEdge
         path={edgePath}
-        style={{ ...EDGE_STYLE, ...style }}
+        style={{
+          ...EDGE_STYLE,
+          ...style,
+          strokeDasharray: "8 4",
+          strokeDashoffset: "100",
+          animation: "siren-dash 2s linear infinite",
+          strokeLinecap: "round",
+        }}
         markerEnd={markerEnd}
         markerStart={markerStart}
       />

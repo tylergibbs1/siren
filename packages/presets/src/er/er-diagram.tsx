@@ -30,8 +30,19 @@ import {
 import { AnimatedEdge } from "../shared/animated-edge";
 import { SelfLoopEdge } from "../shared/self-loop-edge";
 
+/**
+ * ER-tuned layout — wider spacing for entity tables (inspired by Mermaid's
+ * nodesep/ranksep=100 defaults). NETWORK_SIMPLEX node placement produces
+ * cleaner results for wide nodes than BRANDES_KOEPF.
+ */
 function LayoutRunner({ direction }: { direction: LayoutDirection }) {
-  useAutoLayout(direction);
+  useAutoLayout({
+    direction,
+    spacing: { node: 100, layer: 100, edge: 40, edgeNode: 60 },
+    layoutOptions: {
+      "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+    },
+  });
   return null;
 }
 
@@ -42,7 +53,8 @@ interface ERDiagramProps {
   className?: string;
   style?: React.CSSProperties;
   edgeType?: string;
-  interactive?: boolean;
+  mode?: "static" | "interactive";
+  ariaLabel?: string;
 }
 
 const nodeTypes = {
@@ -67,7 +79,8 @@ function ERDiagramInner({
   className,
   style,
   edgeType: diagramEdgeType,
-  interactive,
+  mode,
+  ariaLabel,
 }: Omit<ERDiagramProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -162,11 +175,14 @@ function ERDiagramInner({
         edgeTypes={edgeTypes}
         fitView
         proOptions={PRO_OPTIONS}
-        nodesDraggable={interactive ?? false}
+        nodesDraggable={mode === "interactive"}
         nodesConnectable={false}
-        elementsSelectable={interactive ?? false}
+        elementsSelectable={mode === "interactive"}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="entity relationship diagram"
+        aria-label={ariaLabel ?? "Entity relationship diagram"}
       >
         <LayoutRunner direction={direction} />
         <Background

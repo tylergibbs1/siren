@@ -91,19 +91,49 @@ function variantColors(v: Variant, t: SVGTheme) {
 
 // ── Text measurement heuristic ─────────────────────────────────────
 
-function estimateTextWidth(text: string, fontSize: number): number {
-  // Average character width is ~60% of font size for proportional fonts
-  return text.length * fontSize * 0.6;
+const SANS_RATIO = 0.55;
+
+function fontRatio(fontFamily?: string): number {
+  if (!fontFamily) return SANS_RATIO;
+  const lower = fontFamily.toLowerCase();
+  if (
+    lower.includes("jetbrains") ||
+    lower.includes("fira code") ||
+    lower.includes("monospace") ||
+    lower.includes("consolas") ||
+    lower.includes("sfmono") ||
+    lower.includes("menlo")
+  ) {
+    return 0.62;
+  }
+  if (
+    lower.includes("inter") ||
+    lower.includes("system-ui") ||
+    lower.includes("sans-serif")
+  ) {
+    return 0.53;
+  }
+  return SANS_RATIO;
 }
 
-function wrapText(text: string, maxWidth: number, fontSize: number): string[] {
+function estimateTextWidth(
+  text: string,
+  fontSize: number,
+  fontFamily?: string,
+): number {
+  const primary = text.length * fontSize * fontRatio(fontFamily);
+  const fallback = text.length * fontSize * SANS_RATIO;
+  return Math.max(primary, fallback);
+}
+
+function wrapText(text: string, maxWidth: number, fontSize: number, fontFamily?: string): string[] {
   const words = text.split(/\s+/);
   const lines: string[] = [];
   let current = "";
 
   for (const word of words) {
     const candidate = current ? `${current} ${word}` : word;
-    if (estimateTextWidth(candidate, fontSize) > maxWidth && current) {
+    if (estimateTextWidth(candidate, fontSize, fontFamily) > maxWidth && current) {
       lines.push(current);
       current = word;
     } else {
@@ -557,23 +587,25 @@ function extractDiagramParts(schema: any): DiagramParts {
 
 // ── Node sizing ────────────────────────────────────────────────────
 
-function sizeNode(node: RenderedNode, fontSize: number): SizedNode {
+function sizeNode(node: RenderedNode, fontSize: number, theme: SVGTheme): SizedNode {
   const pad = { x: 48, y: 24 };
+  const font = theme.fontFamily;
+  const mono = theme.fontMono;
 
   if (node.shape === "diamond") {
     return { id: node.id, width: 140, height: 140 };
   }
 
   if (node.shape === "circle" || node.shape === "doublecircle") {
-    const d = Math.max(40, estimateTextWidth(node.label, fontSize) + 24);
+    const d = Math.max(40, estimateTextWidth(node.label, fontSize, font) + 24);
     return { id: node.id, width: d, height: d };
   }
 
   if (node.shape === "entity") {
     const columns: Array<{ name: string; type: string }> = node.meta?.columns ?? [];
-    const headerW = estimateTextWidth(node.label, fontSize + 2) + pad.x;
+    const headerW = estimateTextWidth(node.label, fontSize + 2, font) + pad.x;
     const colWidths = columns.map(
-      (c) => estimateTextWidth(`${c.name}: ${c.type}`, fontSize - 1) + pad.x
+      (c) => estimateTextWidth(`${c.name}: ${c.type}`, fontSize - 1, mono) + pad.x
     );
     const width = Math.max(180, headerW, ...colWidths);
     const height = 36 + columns.length * 24 + 12;
@@ -583,9 +615,9 @@ function sizeNode(node: RenderedNode, fontSize: number): SizedNode {
   if (node.shape === "class") {
     const attrs: string[] = node.meta?.attributes ?? [];
     const methods: string[] = node.meta?.methods ?? [];
-    const headerW = estimateTextWidth(node.label, fontSize + 2) + pad.x;
+    const headerW = estimateTextWidth(node.label, fontSize + 2, font) + pad.x;
     const memberWidths = [...attrs, ...methods].map(
-      (m) => estimateTextWidth(m, fontSize - 1) + pad.x
+      (m) => estimateTextWidth(m, fontSize - 1, mono) + pad.x
     );
     const width = Math.max(180, headerW, ...memberWidths);
     const sections = (attrs.length > 0 ? 1 : 0) + (methods.length > 0 ? 1 : 0);
@@ -594,7 +626,7 @@ function sizeNode(node: RenderedNode, fontSize: number): SizedNode {
   }
 
   if (node.shape === "person") {
-    const width = Math.max(120, estimateTextWidth(node.label, fontSize) + pad.x);
+    const width = Math.max(120, estimateTextWidth(node.label, fontSize, font) + pad.x);
     const desc = node.meta?.description;
     const height = desc ? 72 : 52;
     return { id: node.id, width, height };
@@ -602,7 +634,7 @@ function sizeNode(node: RenderedNode, fontSize: number): SizedNode {
 
   // Default: rounded rectangle
   const lines = node.label.split("\n");
-  const maxLineW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize)));
+  const maxLineW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize, font)));
   const width = Math.max(120, maxLineW + pad.x);
   const height = Math.max(44, lines.length * (fontSize + 6) + pad.y);
   return { id: node.id, width, height };
@@ -631,7 +663,7 @@ function renderNodeSVG(
     parts.push(
       `<polygon points="${cx},${y + h / 2 - dy} ${x + w / 2 + dx},${cy} ${cx},${y + h / 2 + dy} ${x + w / 2 - dx},${cy}" fill="${colors.bg}" stroke="${theme.colors.primary}" stroke-width="1.5"/>`
     );
-    const lines = wrapText(node.label, w * 0.55, fontSize);
+    const lines = wrapText(node.label, w * 0.55, fontSize, theme.fontFamily);
     const lineH = fontSize + 4;
     const startY = cy - ((lines.length - 1) * lineH) / 2;
     for (let i = 0; i < lines.length; i++) {
@@ -798,7 +830,7 @@ function renderEdgeSVG(
       ly = (src.y + src.height / 2 + tgt.y + tgt.height / 2) / 2;
     }
 
-    const labelW = estimateTextWidth(edge.label, fontSize - 1) + 12;
+    const labelW = estimateTextWidth(edge.label, fontSize - 1, theme.fontFamily) + 12;
     parts.push(
       `<rect x="${lx - labelW / 2}" y="${ly - 10}" width="${labelW}" height="20" rx="4" fill="${theme.colors.background}" stroke="${theme.colors.nodeBorder}" stroke-width="0.5"/>`
     );
@@ -881,7 +913,7 @@ function renderSequenceSVG(
   const height = totalH + padding * 2;
 
   const parts: string[] = [];
-  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`);
+  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(schema.title ?? "Sequence diagram")}">`);
   parts.push(`<defs>`);
   parts.push(`<marker id="siren-arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse"><polygon points="0 0, 10 3.5, 0 7" fill="${theme.colors.edge}"/></marker>`);
   parts.push(`<marker id="siren-arrow-reply" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse"><polygon points="0 0, 10 3.5, 0 7" fill="${theme.colors.textMuted}"/></marker>`);
@@ -975,7 +1007,7 @@ export async function renderToSVG(
   const diagram = extractDiagramParts(schema);
 
   // Size nodes
-  const sizedNodes = diagram.nodes.map((n) => sizeNode(n, fontSize));
+  const sizedNodes = diagram.nodes.map((n) => sizeNode(n, fontSize, theme));
   const sizeMap = new Map(sizedNodes.map((n) => [n.id, n]));
 
   // Flat layout: all nodes at root level, groups rendered as visual overlays
@@ -1017,8 +1049,9 @@ export async function renderToSVG(
   const height = maxY + padding * 2;
 
   // Build SVG
+  const diagramLabel = schema.title ?? schema.type ?? "Diagram";
   const parts: string[] = [];
-  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`);
+  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(diagramLabel)}">`);
   parts.push(`<defs>`);
   parts.push(`<marker id="siren-arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse"><polygon points="0 0, 10 3.5, 0 7" fill="${theme.colors.edge}"/></marker>`);
   parts.push(`<style>text { font-family: ${theme.fontFamily}; }</style>`);

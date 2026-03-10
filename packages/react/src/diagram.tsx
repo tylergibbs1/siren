@@ -25,8 +25,8 @@ export interface DiagramProps {
   edgeTypes?: EdgeTypes;
   className?: string;
   style?: React.CSSProperties;
-  showBackground?: boolean;
-  showControls?: boolean;
+  chrome?: "full" | "background" | "none";
+  ariaLabel?: string;
 }
 
 function LayoutRunner({ direction }: { direction: LayoutDirection }) {
@@ -42,8 +42,8 @@ function DiagramInner({
   edgeTypes,
   className,
   style,
-  showBackground = true,
-  showControls = true,
+  chrome = "background",
+  ariaLabel,
 }: Omit<DiagramProps, "theme">) {
   return (
     <div
@@ -60,12 +60,15 @@ function DiagramInner({
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
+        role="img"
+        aria-roledescription="diagram"
+        aria-label={ariaLabel ?? "Diagram"}
       >
         <LayoutRunner direction={direction} />
-        {showBackground && (
+        {(chrome === "background" || chrome === "full") && (
           <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
         )}
-        {showControls && <Controls />}
+        {chrome === "full" && <Controls />}
       </ReactFlow>
     </div>
   );
