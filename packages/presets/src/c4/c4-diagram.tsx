@@ -25,10 +25,18 @@ import {
   EDGE_MARKER,
   EDGE_MARKER_START,
   EDGE_LABEL_STYLE,
+  EDGE_LABEL_BG_STYLE,
   PRO_OPTIONS,
 } from "../shared/edge-styles";
 import { AnimatedEdge } from "../shared/animated-edge";
 import { SelfLoopEdge } from "../shared/self-loop-edge";
+
+const directionToElk: Record<string, string> = {
+  TB: "DOWN",
+  BT: "UP",
+  LR: "RIGHT",
+  RL: "LEFT",
+};
 
 interface C4DiagramProps {
   direction?: LayoutDirection;
@@ -38,6 +46,7 @@ interface C4DiagramProps {
   style?: React.CSSProperties;
   edgeType?: string;
   interactive?: boolean;
+  ariaLabel?: string;
 }
 
 // Hoisted module-level — React Flow docs: "define nodeTypes outside of the component"
@@ -74,11 +83,14 @@ function collectChildren(
       type === C4Boundary ||
       (type as any)?.displayName === "C4Boundary"
     ) {
+      const groupLayoutOptions = props.direction
+        ? { "elk.direction": directionToElk[props.direction] }
+        : undefined;
       nodes.push({
         id: props.id,
         type: "c4-boundary",
         position: { x: 0, y: 0 },
-        data: { label: props.label },
+        data: { label: props.label, layoutOptions: groupLayoutOptions },
         style: { width: 280, height: 180 },
         zIndex: -1,
       });
@@ -143,6 +155,7 @@ function collectChildren(
         style: EDGE_STYLE,
         markerEnd: EDGE_MARKER,
         labelStyle: EDGE_LABEL_STYLE,
+        labelBgStyle: EDGE_LABEL_BG_STYLE,
       };
 
       if (resolvedType && resolvedType !== "default") {
@@ -176,6 +189,7 @@ function C4DiagramInner({
   style,
   edgeType: diagramEdgeType,
   interactive,
+  ariaLabel,
 }: Omit<C4DiagramProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -216,6 +230,9 @@ function C4DiagramInner({
         elementsSelectable={interactive ?? false}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="C4 diagram"
+        aria-label={ariaLabel ?? "C4 diagram"}
       >
         <C4LayoutRunner direction={direction} groupMembership={groupMembership} />
         <Background

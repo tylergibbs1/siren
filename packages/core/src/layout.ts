@@ -197,6 +197,13 @@ export async function layoutGraph(graph: SirenGraph): Promise<LayoutResult> {
     ),
   };
 
+  // Merge caller-provided ELK overrides
+  if (graph.layoutOptions) {
+    for (const [k, v] of Object.entries(graph.layoutOptions)) {
+      layoutOptions[k] = String(v);
+    }
+  }
+
   // Check if any nodes have parentId — if so, build hierarchical graph
   const hasGroups = graph.nodes.some((n) => n.parentId);
 

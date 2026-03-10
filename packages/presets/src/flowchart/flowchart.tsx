@@ -31,6 +31,7 @@ import {
   EDGE_MARKER,
   EDGE_MARKER_START,
   EDGE_LABEL_STYLE,
+  EDGE_LABEL_BG_STYLE,
   PRO_OPTIONS,
 } from "../shared/edge-styles";
 import { AnimatedEdge } from "../shared/animated-edge";
@@ -51,6 +52,7 @@ interface FlowchartProps {
   style?: React.CSSProperties;
   edgeType?: string;
   interactive?: boolean;
+  ariaLabel?: string;
 }
 
 // Hoisted module-level — React Flow docs: "define nodeTypes outside of the component"
@@ -145,6 +147,7 @@ function parseChildren(children: React.ReactNode, diagramEdgeType?: string) {
       markerEnd: EDGE_MARKER,
       markerStart: edge.bidirectional ? EDGE_MARKER_START : undefined,
       labelStyle: EDGE_LABEL_STYLE,
+      labelBgStyle: EDGE_LABEL_BG_STYLE,
       data,
     };
   });
@@ -159,6 +162,7 @@ function FlowchartInner({
   style,
   edgeType: diagramEdgeType,
   interactive,
+  ariaLabel,
 }: Omit<FlowchartProps, "theme">) {
   // Parse children once for initial state
   const initial = useMemo(
@@ -209,6 +213,9 @@ function FlowchartInner({
         elementsSelectable={interactive ?? false}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="flowchart"
+        aria-label={ariaLabel ?? "Flowchart"}
         {...(interactive ? { onNodeDrag, onNodeDragStop } : {})}
       >
         <LayoutRunner direction={direction} />

@@ -25,6 +25,7 @@ import {
   EDGE_DASHED_STYLE,
   EDGE_MARKER_START,
   EDGE_LABEL_STYLE,
+  EDGE_LABEL_BG_STYLE,
   PRO_OPTIONS,
 } from "../shared/edge-styles";
 import { AnimatedEdge } from "../shared/animated-edge";
@@ -43,6 +44,7 @@ interface ClassDiagramProps {
   style?: React.CSSProperties;
   edgeType?: string;
   interactive?: boolean;
+  ariaLabel?: string;
 }
 
 const nodeTypes = {
@@ -67,6 +69,7 @@ function getEdgeForRelationship(
     source: from,
     target: to,
     labelStyle: EDGE_LABEL_STYLE,
+    labelBgStyle: EDGE_LABEL_BG_STYLE,
   };
 
   let edge: Edge;
@@ -169,6 +172,7 @@ function ClassDiagramInner({
   style,
   edgeType: diagramEdgeType,
   interactive,
+  ariaLabel,
 }: Omit<ClassDiagramProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -237,6 +241,9 @@ function ClassDiagramInner({
         elementsSelectable={interactive ?? false}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="class diagram"
+        aria-label={ariaLabel ?? "Class diagram"}
       >
         <LayoutRunner direction={direction} />
         <Background

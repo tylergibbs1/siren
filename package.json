@@ -9,11 +9,14 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
-    "type-check": "turbo type-check"
+    "type-check": "turbo type-check",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "packageManager": "bun@1.3.8",
   "devDependencies": {
     "turbo": "^2.5.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.18"
   }
 }

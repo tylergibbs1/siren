@@ -50,12 +50,14 @@ interface GitGraphProps {
   theme?: SirenTheme;
   className?: string;
   style?: React.CSSProperties;
+  ariaLabel?: string;
 }
 
 function GitGraphInner({
   commits,
   className,
   style,
+  ariaLabel,
 }: Omit<GitGraphProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -160,6 +162,9 @@ function GitGraphInner({
         elementsSelectable={false}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="git graph"
+        aria-label={ariaLabel ?? "Git graph"}
       >
         <Background
           variant={BackgroundVariant.Dots}

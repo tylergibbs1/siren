@@ -22,6 +22,7 @@ interface KanbanProps {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  ariaLabel?: string;
 }
 
 const nodeTypes = {
@@ -33,6 +34,7 @@ function KanbanInner({
   children,
   className,
   style,
+  ariaLabel,
 }: Omit<KanbanProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, , onEdgesChange] = useEdgesState<Edge>([]);
@@ -160,6 +162,9 @@ function KanbanInner({
         elementsSelectable={false}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="kanban board"
+        aria-label={ariaLabel ?? "Kanban board"}
       >
         <Background
           variant={BackgroundVariant.Dots}

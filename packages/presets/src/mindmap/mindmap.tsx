@@ -41,6 +41,7 @@ interface MindmapPropsWithRoot {
   theme?: SirenTheme;
   className?: string;
   style?: React.CSSProperties;
+  ariaLabel?: string;
 }
 
 interface MindmapPropsWithChildren {
@@ -49,6 +50,7 @@ interface MindmapPropsWithChildren {
   theme?: SirenTheme;
   className?: string;
   style?: React.CSSProperties;
+  ariaLabel?: string;
 }
 
 type MindmapProps = MindmapPropsWithRoot | MindmapPropsWithChildren;
@@ -159,9 +161,11 @@ function collectItems(children: React.ReactNode): { nodes: Node[]; edges: Edge[]
 function MindmapLayout({
   initialNodes,
   initialEdges,
+  ariaLabel,
 }: {
   initialNodes: Node[];
   initialEdges: Edge[];
+  ariaLabel?: string;
 }) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
@@ -233,6 +237,9 @@ function MindmapLayout({
       elementsSelectable={false}
       minZoom={0.3}
       maxZoom={2}
+      role="img"
+      aria-roledescription="mindmap"
+      aria-label={ariaLabel ?? "Mindmap"}
     >
       <Background
         variant={BackgroundVariant.Dots}
@@ -250,6 +257,7 @@ function MindmapInner({
   children,
   className,
   style,
+  ariaLabel,
 }: Omit<MindmapProps, "theme">) {
   const { initialNodes, initialEdges } = useMemo(() => {
     // If a root tree is provided, use the tree API
@@ -276,6 +284,7 @@ function MindmapInner({
         <MindmapLayout
           initialNodes={initialNodes}
           initialEdges={initialEdges}
+          ariaLabel={ariaLabel}
         />
       </ReactFlowProvider>
     </div>

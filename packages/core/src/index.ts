@@ -1,5 +1,6 @@
 export { layoutGraph } from "./layout";
 export { renderToSVG } from "./svg";
+export { sanitizeText, sanitizeUrl } from "./sanitize";
 export type {
   SirenNode,
   SirenEdge,

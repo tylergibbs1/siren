@@ -27,6 +27,7 @@ export interface DiagramProps {
   style?: React.CSSProperties;
   showBackground?: boolean;
   showControls?: boolean;
+  ariaLabel?: string;
 }
 
 function LayoutRunner({ direction }: { direction: LayoutDirection }) {
@@ -43,7 +44,8 @@ function DiagramInner({
   className,
   style,
   showBackground = true,
-  showControls = true,
+  showControls = false,
+  ariaLabel,
 }: Omit<DiagramProps, "theme">) {
   return (
     <div
@@ -60,6 +62,9 @@ function DiagramInner({
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
+        role="img"
+        aria-roledescription="diagram"
+        aria-label={ariaLabel ?? "Diagram"}
       >
         <LayoutRunner direction={direction} />
         {showBackground && (

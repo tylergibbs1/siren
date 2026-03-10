@@ -1,0 +1,30 @@
+/*
+ * Siren <> tweakcn / shadcn bridge
+ *
+ * Import this file to make Siren diagrams automatically inherit your app's
+ * tweakcn/shadcn CSS variables. No SirenProvider needed — just:
+ *
+ *   @import "@siren/themes/tweakcn.css";
+ *
+ * If you also use SirenProvider, its inline styles take precedence over these
+ * CSS-level defaults, so both approaches can coexist.
+ */
+
+:root {
+  --siren-bg: var(--background);
+  --siren-surface: var(--secondary);
+  --siren-surface-raised: var(--card);
+  --siren-node: var(--card);
+  --siren-node-border: var(--border);
+  --siren-border-strong: var(--ring);
+  --siren-edge: var(--muted-foreground);
+  --siren-text: var(--foreground);
+  --siren-text-muted: var(--muted-foreground);
+  --siren-text-subtle: var(--muted-foreground);
+  --siren-primary: var(--primary);
+  --siren-primary-muted: var(--accent);
+  --siren-danger: var(--destructive);
+  --siren-radius: var(--radius);
+  --siren-font: var(--font-sans);
+  --siren-font-mono: var(--font-mono);
+}

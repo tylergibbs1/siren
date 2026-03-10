@@ -13,6 +13,8 @@ export interface AutoLayoutOptions {
     edge?: number;
     edgeNode?: number;
   };
+  /** Extra ELK layout options passed through to layoutGraph */
+  layoutOptions?: Record<string, string | number>;
 }
 
 /**
@@ -30,6 +32,7 @@ export function useAutoLayout(
       : directionOrOpts;
   const direction = opts.direction ?? "TB";
   const spacing = opts.spacing;
+  const layoutOptions = opts.layoutOptions;
 
   const { setNodes, getNodes, getEdges, fitView } = useReactFlow();
   const layoutRunRef = useRef(0);
@@ -86,6 +89,7 @@ export function useAutoLayout(
       edges: sirenEdges,
       direction,
       spacing,
+      layoutOptions,
     })
       .then((result) => {
         if (run !== layoutRunRef.current) return;
@@ -111,6 +115,7 @@ export function useAutoLayout(
     edgeKey,
     direction,
     spacing,
+    layoutOptions,
     getNodes,
     getEdges,
     setNodes,

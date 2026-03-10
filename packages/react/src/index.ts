@@ -1,6 +1,10 @@
 export { ClientOnly } from "./client-only";
 export { Diagram } from "./diagram";
+export { DiagramErrorFallback } from "./error-fallback";
 export { useAutoLayout } from "./use-auto-layout";
 export { useGroupedLayout } from "./use-grouped-layout";
 export { useCollisionDetection } from "./use-collision-detection";
+export { ResponsiveDiagram } from "./responsive-wrapper";
 export type { DiagramProps } from "./diagram";
+export type { DiagramErrorFallbackProps } from "./error-fallback";
+export type { ResponsiveDiagramProps } from "./responsive-wrapper";

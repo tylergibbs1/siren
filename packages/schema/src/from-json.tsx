@@ -295,7 +295,7 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
               if (element.type === "boundary") {
                 return el(
                   C4Boundary,
-                  { key: element.id, id: element.id, label: element.label },
+                  { key: element.id, id: element.id, label: element.label, direction: element.direction },
                   element.children?.map((child) => {
                     if (child.type === "person") {
                       return el(C4Person, {
@@ -344,7 +344,7 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
             {schema.groups.map((group) =>
               el(
                 ArchGroup,
-                { key: group.id, id: group.id, label: group.label, icon: group.icon },
+                { key: group.id, id: group.id, label: group.label, icon: group.icon, direction: group.direction },
                 group.services.map((service) =>
                   el(ArchService, {
                     key: service.id,
@@ -385,7 +385,7 @@ export function fromJSON(schema: SirenSchema): React.ReactElement {
               if (block.children && block.children.length > 0) {
                 return el(
                   BlockGroup,
-                  { key: block.id, id: block.id, label: block.label },
+                  { key: block.id, id: block.id, label: block.label, direction: block.direction },
                   block.children.map((child) =>
                     el(BlockNode, { key: child.id, id: child.id, label: child.label })
                   )

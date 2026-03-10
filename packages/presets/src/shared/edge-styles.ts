@@ -31,5 +31,8 @@ export const EDGE_LABEL_STYLE = {
 };
 export const EDGE_LABEL_BG_STYLE = {
   fill: "var(--siren-bg, hsl(0 0% 7.1%))",
+  fillOpacity: 0.85,
+  rx: 4,
+  ry: 4,
 };
 export const PRO_OPTIONS = { hideAttribution: true };

@@ -30,6 +30,7 @@ interface SequenceProps {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  ariaLabel?: string;
 }
 
 const nodeTypes = {
@@ -51,6 +52,7 @@ function SequenceInner({
   children,
   className,
   style,
+  ariaLabel,
 }: Omit<SequenceProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -136,6 +138,9 @@ function SequenceInner({
         elementsSelectable={false}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="sequence diagram"
+        aria-label={ariaLabel ?? "Sequence diagram"}
       >
         <Background
           variant={BackgroundVariant.Dots}

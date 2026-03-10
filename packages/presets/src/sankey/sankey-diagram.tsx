@@ -46,6 +46,7 @@ interface SankeyDiagramProps {
   theme?: SirenTheme;
   className?: string;
   style?: React.CSSProperties;
+  ariaLabel?: string;
 }
 
 /**
@@ -97,6 +98,7 @@ function SankeyDiagramInner({
   flows,
   className,
   style,
+  ariaLabel,
 }: Omit<SankeyDiagramProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -228,6 +230,9 @@ function SankeyDiagramInner({
         elementsSelectable={false}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="sankey diagram"
+        aria-label={ariaLabel ?? "Sankey diagram"}
       >
         <Background
           variant={BackgroundVariant.Dots}

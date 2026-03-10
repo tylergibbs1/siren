@@ -5,6 +5,7 @@
     "---JSON-first Workflow---",
     "json-schema",
     "render-from-json",
+    "theming",
     "---Diagram Types---",
     "flowchart",
     "sequence",

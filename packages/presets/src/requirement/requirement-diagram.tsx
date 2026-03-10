@@ -23,6 +23,7 @@ import {
   EDGE_MARKER,
   EDGE_MARKER_START,
   EDGE_LABEL_STYLE,
+  EDGE_LABEL_BG_STYLE,
   PRO_OPTIONS,
 } from "../shared/edge-styles";
 import { AnimatedEdge } from "../shared/animated-edge";
@@ -41,6 +42,7 @@ interface RequirementDiagramProps {
   style?: React.CSSProperties;
   edgeType?: string;
   interactive?: boolean;
+  ariaLabel?: string;
 }
 
 // Hoisted module-level
@@ -60,6 +62,7 @@ function RequirementDiagramInner({
   style,
   edgeType: diagramEdgeType,
   interactive,
+  ariaLabel,
 }: Omit<RequirementDiagramProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -109,6 +112,7 @@ function RequirementDiagramInner({
           style: EDGE_STYLE,
           markerEnd: EDGE_MARKER,
           labelStyle: EDGE_LABEL_STYLE,
+          labelBgStyle: EDGE_LABEL_BG_STYLE,
         };
 
         if (resolvedType && resolvedType !== "default") {
@@ -153,6 +157,9 @@ function RequirementDiagramInner({
         elementsSelectable={interactive ?? false}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="requirement diagram"
+        aria-label={ariaLabel ?? "Requirement diagram"}
       >
         <LayoutRunner direction={direction} />
         <Background

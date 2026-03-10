@@ -2,8 +2,92 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toSvg, toPng } from "html-to-image";
+import { themes, type SirenTheme } from "@siren/themes";
 import { CodeEditor } from "./code-editor";
 import { DiagramPreview } from "./diagram-preview";
+
+type ThemeId = keyof typeof themes | "custom";
+
+const THEME_OPTIONS: { id: ThemeId; label: string }[] = [
+  { id: "dark", label: "Dark" },
+  { id: "light", label: "Light" },
+  { id: "github", label: "GitHub" },
+  { id: "presentation", label: "Presentation" },
+  { id: "custom", label: "Custom (tweakcn)" },
+];
+
+/** Known tweakcn CSS variable names used by the theme bridge */
+type TweakcnVar =
+  | "--background"
+  | "--foreground"
+  | "--card"
+  | "--secondary"
+  | "--border"
+  | "--ring"
+  | "--muted-foreground"
+  | "--primary"
+  | "--accent"
+  | "--destructive"
+  | "--chart-2"
+  | "--chart-4"
+  | "--radius"
+  | "--font-sans"
+  | "--font-mono";
+
+type CSSVarMap = Partial<Record<TweakcnVar, string>> & Record<string, string>;
+
+/**
+ * Parse CSS variable declarations from a tweakcn/shadcn index.css string.
+ * Extracts vars from both `:root` and `.dark` blocks, with `.dark` taking precedence.
+ */
+function parseCSSVariables(css: string): CSSVarMap {
+  const vars: CSSVarMap = {};
+
+  // Match all CSS blocks and extract variable declarations
+  const blockRegex = /(?::root|\.dark)\s*\{([^}]+)\}/g;
+  let match: RegExpExecArray | null;
+  while ((match = blockRegex.exec(css)) !== null) {
+    const declarations = match[1];
+    const varRegex = /--([\w-]+)\s*:\s*([^;]+);/g;
+    let varMatch: RegExpExecArray | null;
+    while ((varMatch = varRegex.exec(declarations)) !== null) {
+      vars[`--${varMatch[1]}`] = varMatch[2].trim();
+    }
+  }
+
+  return vars;
+}
+
+/** Build a SirenTheme from parsed tweakcn CSS variables */
+function buildThemeFromCSS(vars: CSSVarMap): SirenTheme | null {
+  const get = (name: TweakcnVar): string | undefined => vars[name];
+
+  // Need at least background + foreground to be useful
+  if (!get("--background") || !get("--foreground")) return null;
+
+  return {
+    colors: {
+      background: get("--background") ?? themes.dark.colors.background,
+      surface: get("--secondary") ?? get("--card") ?? themes.dark.colors.surface,
+      surfaceRaised: get("--card") ?? themes.dark.colors.surfaceRaised,
+      node: get("--card") ?? themes.dark.colors.node,
+      nodeBorder: get("--border") ?? themes.dark.colors.nodeBorder,
+      borderStrong: get("--ring") ?? themes.dark.colors.borderStrong,
+      edge: get("--muted-foreground") ?? themes.dark.colors.edge,
+      text: get("--foreground") ?? themes.dark.colors.text,
+      textMuted: get("--muted-foreground") ?? themes.dark.colors.textMuted,
+      textSubtle: get("--muted-foreground") ?? themes.dark.colors.textSubtle,
+      primary: get("--primary") ?? themes.dark.colors.primary,
+      primaryMuted: get("--accent") ?? themes.dark.colors.primaryMuted,
+      success: get("--chart-2") ?? themes.dark.colors.success,
+      warning: get("--chart-4") ?? themes.dark.colors.warning,
+      danger: get("--destructive") ?? themes.dark.colors.danger,
+    },
+    radius: get("--radius") ?? themes.dark.radius,
+    fontFamily: get("--font-sans") ?? themes.dark.fontFamily,
+    fontMono: get("--font-mono") ?? themes.dark.fontMono,
+  };
+}
 
 const FLOWCHART_TEMPLATE = `{
   "type": "flowchart",
@@ -182,11 +266,17 @@ export function Playground() {
   const [code, setCode] = useState<string>(TEMPLATES[DEFAULT_TEMPLATE].code);
   const [error, setError] = useState<string | null>(null);
   const [template, setTemplate] = useState<TemplateId>(DEFAULT_TEMPLATE);
+  const [themeId, setThemeId] = useState<ThemeId>("dark");
+  const [customTheme, setCustomTheme] = useState<SirenTheme | null>(null);
+  const [showThemeModal, setShowThemeModal] = useState(false);
+  const [themeCSS, setThemeCSS] = useState("");
+  const [themeCSSError, setThemeCSSError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const statusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const exportMenuRef = useRef<HTMLDivElement>(null);
+  const themeModalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -219,7 +309,24 @@ export function Playground() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showExportMenu]);
 
-  const templateInfo = useMemo(() => TEMPLATES[template], [template]);
+  // Close theme modal on outside click
+  useEffect(() => {
+    if (!showThemeModal) return;
+    function handleClick(e: MouseEvent) {
+      if (themeModalRef.current && !themeModalRef.current.contains(e.target as Node)) {
+        setShowThemeModal(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showThemeModal]);
+
+  const activeTheme = useMemo(() => {
+    if (themeId === "custom") return customTheme ?? themes.dark;
+    return themes[themeId];
+  }, [themeId, customTheme]);
+
+  const templateInfo = TEMPLATES[template];
 
   const setEphemeralStatus = useCallback((value: string) => {
     setStatus(value);
@@ -232,6 +339,15 @@ export function Playground() {
     setCode(value);
     setError(null);
   }, []);
+
+  const handleThemeChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const next = event.target.value as ThemeId;
+      setThemeId(next);
+      if (next === "custom") setShowThemeModal(true);
+    },
+    []
+  );
 
   const handleTemplateChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -260,7 +376,7 @@ export function Playground() {
     if (!container) return;
     try {
       const dataUrl = await toSvg(container, {
-        backgroundColor: "#0a0a1a",
+        backgroundColor: activeTheme.colors.background,
         style: { margin: "0", padding: "0" },
       });
       // Convert data URL to raw SVG string
@@ -271,7 +387,7 @@ export function Playground() {
       console.error("[siren] SVG export failed:", err);
       setEphemeralStatus("SVG export failed");
     }
-  }, [setEphemeralStatus]);
+  }, [activeTheme, setEphemeralStatus]);
 
   const handleExportPNG = useCallback(async () => {
     setShowExportMenu(false);
@@ -280,7 +396,7 @@ export function Playground() {
     try {
       const dataUrl = await toPng(container, {
         pixelRatio: 2,
-        backgroundColor: "#0a0a1a",
+        backgroundColor: activeTheme.colors.background,
         style: { margin: "0", padding: "0" },
       });
       const link = document.createElement("a");
@@ -292,7 +408,7 @@ export function Playground() {
       console.error("[siren] PNG export failed:", err);
       setEphemeralStatus("PNG export failed");
     }
-  }, [setEphemeralStatus]);
+  }, [activeTheme, setEphemeralStatus]);
 
   const handleCopyEmbed = useCallback(async () => {
     setShowExportMenu(false);
@@ -301,6 +417,19 @@ export function Playground() {
     await navigator.clipboard.writeText(embedSnippet);
     setEphemeralStatus("Copied embed snippet");
   }, [code, setEphemeralStatus]);
+
+  const handleApplyThemeCSS = useCallback(() => {
+    const vars = parseCSSVariables(themeCSS);
+    const parsed = buildThemeFromCSS(vars);
+    if (!parsed) {
+      setThemeCSSError(
+        "Could not find --background and --foreground variables. Paste a valid tweakcn index.css."
+      );
+      return;
+    }
+    setCustomTheme(parsed);
+    setShowThemeModal(false);
+  }, [themeCSS]);
 
   const handleShare = useCallback(async () => {
     const url = `${window.location.origin}${window.location.pathname}${SHARE_PREFIX}${encodeURIComponent(code)}`;
@@ -326,6 +455,28 @@ export function Playground() {
                 </option>
               ))}
             </select>
+            <select
+              value={themeId}
+              onChange={handleThemeChange}
+              aria-label="Color theme"
+              className="rounded-md border border-border bg-scale-2 px-3 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {THEME_OPTIONS.map(({ id, label }) => (
+                <option key={id} value={id}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            {themeId === "custom" && (
+              <button
+                type="button"
+                onClick={() => setShowThemeModal(true)}
+                aria-label="Edit custom theme"
+                className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground transition-[color,background-color] hover:bg-scale-3 hover:text-foreground"
+              >
+                Edit CSS
+              </button>
+            )}
             <div className="hidden min-w-0 md:block">
               <p className="text-sm text-foreground">{templateInfo.label}</p>
               <p className="truncate text-xs text-muted-foreground">
@@ -431,10 +582,58 @@ export function Playground() {
             </span>
           </div>
           <div className="min-h-0 flex-1">
-            <DiagramPreview ref={previewRef} code={code} onError={setError} />
+            <DiagramPreview ref={previewRef} code={code} onError={setError} theme={activeTheme} />
           </div>
         </div>
       </div>
+
+      {/* tweakcn CSS paste modal */}
+      {showThemeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div
+            ref={themeModalRef}
+            className="mx-4 flex w-full max-w-lg flex-col gap-3 rounded-lg border border-border bg-scale-2 p-5 shadow-xl"
+          >
+            <div>
+              <h3 className="text-sm font-medium text-foreground">
+                Import tweakcn theme
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Paste your tweakcn / shadcn index.css to preview diagrams in your app&apos;s theme.
+              </p>
+            </div>
+            <textarea
+              value={themeCSS}
+              onChange={(e) => {
+                setThemeCSS(e.target.value);
+                setThemeCSSError(null);
+              }}
+              placeholder={`:root {\n  --background: oklch(0.98 0 0);\n  --foreground: oklch(0.14 0 0);\n  ...\n}\n\n.dark {\n  --background: oklch(0.13 0 0);\n  ...\n}`}
+              spellCheck={false}
+              className="h-64 w-full resize-none rounded-md border border-border bg-scale-1 p-3 font-mono text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            {themeCSSError && (
+              <p className="text-xs text-destructive">{themeCSSError}</p>
+            )}
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowThemeModal(false)}
+                className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-[color,background-color] hover:bg-scale-3"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyThemeCSS}
+                className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Apply theme
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

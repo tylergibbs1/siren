@@ -1,0 +1,119 @@
+---
+title: Theming
+description: Customize diagram appearance with built-in theme presets, tweakcn/shadcn integration, or your own custom theme.
+---
+
+Siren diagrams can inherit your app's existing theme automatically, or use built-in presets. You can switch themes in the [Playground](/) using the theme dropdown.
+
+## tweakcn / shadcn integration
+
+If your app already uses [tweakcn](https://tweakcn.com) or [shadcn/ui](https://ui.shadcn.com) CSS variables, Siren can inherit them with a single import:
+
+```css
+@import "@siren/themes/tweakcn.css";
+```
+
+That's it. Diagrams will automatically use your app's `--background`, `--foreground`, `--primary`, `--border`, `--card`, and other CSS variables. No `SirenProvider` needed.
+
+The mapping:
+
+| Siren variable | tweakcn source |
+| --- | --- |
+| `--siren-bg` | `--background` |
+| `--siren-surface` | `--secondary` |
+| `--siren-surface-raised` | `--card` |
+| `--siren-node` | `--card` |
+| `--siren-node-border` | `--border` |
+| `--siren-border-strong` | `--ring` |
+| `--siren-edge` | `--muted-foreground` |
+| `--siren-text` | `--foreground` |
+| `--siren-text-muted` | `--muted-foreground` |
+| `--siren-text-subtle` | `--muted-foreground` |
+| `--siren-primary` | `--primary` |
+| `--siren-primary-muted` | `--accent` |
+| `--siren-danger` | `--destructive` |
+| `--siren-radius` | `--radius` |
+| `--siren-font` | `--font-sans` |
+| `--siren-font-mono` | `--font-mono` |
+
+Dark mode works automatically — tweakcn overrides these variables under `.dark`, and Siren inherits the new values.
+
+If you also use `SirenProvider`, its inline styles take precedence over the CSS-level defaults, so both approaches coexist.
+
+## Built-in themes
+
+Siren ships four built-in presets for use with `SirenProvider`:
+
+| Theme | Description |
+| --- | --- |
+| `dark` | Achromatic grays, code-editor aesthetic (default) |
+| `light` | Near-white backgrounds, same accent |
+| `github` | GitHub's UI color palette |
+| `presentation` | Deep dark with indigo accent, ideal for slides |
+
+## Usage with SirenProvider
+
+Wrap your diagram in `SirenProvider` to apply a specific theme:
+
+```tsx
+import { fromJSON, validate } from "@siren/schema";
+import { SirenProvider, themes } from "@siren/themes";
+
+const result = validate(document);
+
+if (result.valid) {
+  return (
+    <SirenProvider theme={themes.github}>
+      {fromJSON(result.data)}
+    </SirenProvider>
+  );
+}
+```
+
+Available themes:
+
+```tsx
+import { themes } from "@siren/themes";
+
+themes.dark;         // default
+themes.light;
+themes.github;
+themes.presentation;
+```
+
+## Custom themes
+
+Create a custom theme by providing a `SirenTheme` object:
+
+```tsx
+import { SirenProvider, type SirenTheme } from "@siren/themes";
+
+const custom: SirenTheme = {
+  colors: {
+    background: "#1a1a2e",
+    surface: "#16213e",
+    surfaceRaised: "#0f3460",
+    node: "#0f3460",
+    nodeBorder: "#1a5276",
+    borderStrong: "#2980b9",
+    edge: "#5dade2",
+    text: "#ecf0f1",
+    textMuted: "#bdc3c7",
+    textSubtle: "#95a5a6",
+    primary: "#e94560",
+    primaryMuted: "#2d1f2f",
+    success: "#27ae60",
+    warning: "#f39c12",
+    danger: "#e74c3c",
+  },
+  radius: "8px",
+  fontFamily: "Inter, system-ui, sans-serif",
+  fontMono: "'JetBrains Mono', monospace",
+};
+
+<SirenProvider theme={custom}>
+  {fromJSON(result.data)}
+</SirenProvider>
+```
+
+All color values are injected as CSS custom properties (`--siren-*`) on a wrapper element, so they cascade into all nested diagram components.

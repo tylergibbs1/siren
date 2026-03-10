@@ -26,6 +26,7 @@ import {
   EDGE_MARKER,
   EDGE_MARKER_START,
   EDGE_LABEL_STYLE,
+  EDGE_LABEL_BG_STYLE,
   PRO_OPTIONS,
 } from "../shared/edge-styles";
 import { AnimatedEdge } from "../shared/animated-edge";
@@ -44,6 +45,7 @@ interface StateDiagramProps {
   style?: React.CSSProperties;
   edgeType?: string;
   interactive?: boolean;
+  ariaLabel?: string;
 }
 
 // Hoisted module-level — React Flow docs: "define nodeTypes outside of the component"
@@ -65,6 +67,7 @@ function StateDiagramInner({
   style,
   edgeType: diagramEdgeType,
   interactive,
+  ariaLabel,
 }: Omit<StateDiagramProps, "theme">) {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -137,6 +140,7 @@ function StateDiagramInner({
           style: EDGE_STYLE,
           markerEnd: EDGE_MARKER,
           labelStyle: EDGE_LABEL_STYLE,
+          labelBgStyle: EDGE_LABEL_BG_STYLE,
         };
 
         if (resolvedType && resolvedType !== "default") {
@@ -181,6 +185,9 @@ function StateDiagramInner({
         elementsSelectable={interactive ?? false}
         minZoom={0.3}
         maxZoom={2}
+        role="img"
+        aria-roledescription="state diagram"
+        aria-label={ariaLabel ?? "State diagram"}
       >
         <LayoutRunner direction={direction} />
         <Background

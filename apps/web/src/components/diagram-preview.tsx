@@ -2,10 +2,13 @@
 
 import React, { Component, forwardRef, useEffect, useMemo } from "react";
 import { fromJSON, validate } from "@siren/schema";
+import { SirenProvider, type SirenTheme } from "@siren/themes";
+import { DiagramErrorFallback } from "@siren/react";
 
 interface DiagramPreviewProps {
   code: string;
   onError: (error: string | null) => void;
+  theme?: SirenTheme;
 }
 
 class DiagramErrorBoundary extends Component<
@@ -27,18 +30,14 @@ class DiagramErrorBoundary extends Component<
 
   render() {
     if (this.state.hasError) {
-      return (
-        <div className="flex h-full w-full items-center justify-center p-4 text-sm text-destructive">
-          {this.state.errorMessage}
-        </div>
-      );
+      return <DiagramErrorFallback error={this.state.errorMessage} />;
     }
 
     return this.props.children;
   }
 }
 
-function PreviewInner({ code, onError }: DiagramPreviewProps) {
+function PreviewInner({ code, onError, theme }: DiagramPreviewProps) {
   const { schema, error } = useMemo(() => {
     try {
       const parsed = JSON.parse(code);
@@ -76,7 +75,11 @@ function PreviewInner({ code, onError }: DiagramPreviewProps) {
     );
   }
 
-  return <DiagramErrorBoundary key={code}>{fromJSON(schema)}</DiagramErrorBoundary>;
+  return (
+    <DiagramErrorBoundary key={code}>
+      <SirenProvider theme={theme}>{fromJSON(schema)}</SirenProvider>
+    </DiagramErrorBoundary>
+  );
 }
 
 export const DiagramPreview = forwardRef<HTMLDivElement, DiagramPreviewProps>(
