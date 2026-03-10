@@ -71,17 +71,27 @@ Each node needs a unique `id` and a `label`.
 | --- | --- | --- |
 | `id` | Yes | Unique identifier — edges reference this |
 | `label` | Yes | Text displayed in the node |
-| `shape` | No | `"rounded"` (default), `"rectangle"`, or `"diamond"` |
+| `shape` | No | `"rounded"` (default), `"diamond"`, `"stadium"`, `"cylinder"`, `"hexagon"`, `"cloud"`, `"document"`, `"note"`, `"subroutine"`, `"trapezoid"` |
 | `variant` | No | `"default"`, `"primary"`, `"success"`, `"warning"`, or `"danger"` |
 
 ### Shapes
 
 - **`"rounded"`** — Default rectangle with rounded corners. Use for regular steps.
-- **`"rectangle"`** — Sharp-cornered rectangle.
 - **`"diamond"`** — Diamond shape. Use for yes/no decisions.
+- **`"stadium"`** — Pill/capsule shape. Use for terminal or I/O nodes.
+- **`"cylinder"`** — Database drum. Use for databases and storage.
+- **`"hexagon"`** — Six-sided polygon. Use for preparation steps.
+- **`"cloud"`** — Cloud shape. Use for cloud services and external systems.
+- **`"document"`** — Rectangle with wavy bottom. Use for reports and files.
+- **`"note"`** — Rectangle with folded corner. Use for annotations and comments.
+- **`"subroutine"`** — Double-bordered rectangle. Use for sub-processes and routines.
+- **`"trapezoid"`** — Wider at bottom, narrower at top. Use for manual operations.
 
 ```json
 { "id": "check", "label": "Is it valid?", "shape": "diamond" }
+{ "id": "db", "label": "PostgreSQL", "shape": "cylinder" }
+{ "id": "aws", "label": "S3 Bucket", "shape": "cloud" }
+{ "id": "report", "label": "PDF Report", "shape": "document" }
 ```
 
 ### Variants

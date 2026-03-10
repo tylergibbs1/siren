@@ -7,6 +7,7 @@ import {
   Background,
   BackgroundVariant,
   Controls,
+  MiniMap,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -248,6 +249,14 @@ function MindmapLayout({
         color="var(--siren-node-border, hsl(0 0% 18%))"
       />
       <Controls />
+      <MiniMap
+        nodeStrokeWidth={2}
+        nodeColor="var(--siren-node, hsl(0 0% 12.2%))"
+        maskColor="rgba(0, 0, 0, 0.6)"
+        style={{ background: "var(--siren-bg, hsl(0 0% 7.1%))", borderRadius: 8 }}
+        pannable
+        zoomable
+      />
     </ReactFlow>
   );
 }

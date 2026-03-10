@@ -15,6 +15,7 @@ import {
   Background,
   BackgroundVariant,
   Controls,
+  MiniMap,
   type Node,
   type Edge,
 } from "@xyflow/react";
@@ -24,6 +25,16 @@ import type { LayoutDirection } from "@siren/core";
 import { Step } from "./step";
 import { Decision } from "./decision";
 import { FlowEdge } from "./edge";
+import {
+  Stadium,
+  Cylinder,
+  Hexagon,
+  Cloud,
+  Document,
+  Note,
+  Subroutine,
+  Trapezoid,
+} from "./shapes";
 import { useAutoLayout, useCollisionDetection, ClientOnly } from "@siren/react";
 import {
   EDGE_STYLE,
@@ -59,6 +70,14 @@ interface FlowchartProps {
 const nodeTypes = {
   step: Step,
   decision: Decision,
+  stadium: Stadium,
+  cylinder: Cylinder,
+  hexagon: Hexagon,
+  cloud: Cloud,
+  document: Document,
+  note: Note,
+  subroutine: Subroutine,
+  trapezoid: Trapezoid,
 };
 
 const edgeTypes = {
@@ -71,6 +90,27 @@ const edgeTypes = {
 // Hoisted static wrapper style (rendering-hoist-jsx)
 const DEFAULT_WRAPPER_STYLE = { width: "100%", height: "100%" };
 
+// Hoisted position object — avoids creating { x: 0, y: 0 } per node (rendering-hoist-jsx)
+const ZERO_POSITION = { x: 0, y: 0 };
+
+// O(1) component → node type lookup maps (js-set-map-lookups)
+const SHAPE_ENTRIES: Array<[any, string]> = [
+  [Step, "step"],
+  [Decision, "decision"],
+  [Stadium, "stadium"],
+  [Cylinder, "cylinder"],
+  [Hexagon, "hexagon"],
+  [Cloud, "cloud"],
+  [Document, "document"],
+  [Note, "note"],
+  [Subroutine, "subroutine"],
+  [Trapezoid, "trapezoid"],
+];
+const SHAPE_COMPONENT_MAP = new Map<any, string>(SHAPE_ENTRIES);
+const SHAPE_DISPLAY_NAME_MAP = new Map<string, string>(
+  SHAPE_ENTRIES.map(([comp, type]) => [(comp as any).displayName ?? "", type])
+);
+
 function parseChildren(children: React.ReactNode, diagramEdgeType?: string) {
   const nodes: Node[] = [];
   const rawEdges: Array<Record<string, any>> = [];
@@ -81,23 +121,17 @@ function parseChildren(children: React.ReactNode, diagramEdgeType?: string) {
     const type = child.type;
     const props = child.props as Record<string, any>;
 
-    if (type === Step || (type as any)?.displayName === "Step") {
+    const matchedType = SHAPE_COMPONENT_MAP.get(type)
+      ?? ((type as any)?.displayName ? SHAPE_DISPLAY_NAME_MAP.get((type as any).displayName) : undefined);
+
+    if (matchedType) {
       nodes.push({
         id: props.id,
-        type: "step",
-        position: { x: 0, y: 0 },
+        type: matchedType,
+        position: ZERO_POSITION,
         data: {
           label: props.label,
           variant: props.variant,
-        },
-      });
-    } else if (type === Decision || (type as any)?.displayName === "Decision") {
-      nodes.push({
-        id: props.id,
-        type: "decision",
-        position: { x: 0, y: 0 },
-        data: {
-          label: props.label,
         },
       });
     } else if (
@@ -221,6 +255,14 @@ function FlowchartInner({
         <LayoutRunner direction={direction} />
         <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="var(--siren-node-border, hsl(0 0% 18%))" />
         <Controls />
+        <MiniMap
+          nodeStrokeWidth={2}
+          nodeColor="var(--siren-node, hsl(0 0% 12.2%))"
+          maskColor="rgba(0, 0, 0, 0.6)"
+          style={{ background: "var(--siren-bg, hsl(0 0% 7.1%))", borderRadius: 8 }}
+          pannable
+          zoomable
+        />
       </ReactFlow>
     </div>
   );

@@ -132,6 +132,310 @@ const ER_TEMPLATE = `{
   ]
 }`;
 
+const STATE_TEMPLATE = `{
+  "type": "state",
+  "direction": "TB",
+  "states": [
+    { "id": "idle", "label": "Idle", "initial": true },
+    { "id": "fetching", "label": "Fetching Data" },
+    { "id": "success", "label": "Success", "variant": "success" },
+    { "id": "error", "label": "Error", "variant": "danger" },
+    { "id": "retry", "label": "Retry", "variant": "warning" }
+  ],
+  "transitions": [
+    { "from": "idle", "to": "fetching", "label": "fetch()" },
+    { "from": "fetching", "to": "success", "label": "200 OK" },
+    { "from": "fetching", "to": "error", "label": "500 / timeout" },
+    { "from": "error", "to": "retry", "guard": "retries < 3" },
+    { "from": "retry", "to": "fetching", "label": "backoff" },
+    { "from": "success", "to": "idle", "label": "reset" }
+  ]
+}`;
+
+const CLASS_TEMPLATE = `{
+  "type": "class",
+  "direction": "TB",
+  "classes": [
+    {
+      "id": "Animal",
+      "name": "Animal",
+      "attributes": ["+name: string", "+age: number"],
+      "methods": ["+speak(): string", "+move(distance: number): void"]
+    },
+    {
+      "id": "Dog",
+      "name": "Dog",
+      "attributes": ["+breed: string"],
+      "methods": ["+speak(): string", "+fetch(item: string): void"]
+    },
+    {
+      "id": "Cat",
+      "name": "Cat",
+      "attributes": ["+indoor: boolean"],
+      "methods": ["+speak(): string", "+purr(): void"]
+    }
+  ],
+  "relationships": [
+    { "from": "Dog", "to": "Animal", "label": "extends", "type": "inheritance" },
+    { "from": "Cat", "to": "Animal", "label": "extends", "type": "inheritance" }
+  ]
+}`;
+
+const C4_TEMPLATE = `{
+  "type": "c4",
+  "direction": "TB",
+  "elements": [
+    { "id": "user", "label": "Customer", "type": "person", "description": "A customer of the bank" },
+    {
+      "id": "banking", "type": "boundary", "label": "Internet Banking System",
+      "children": [
+        { "id": "webapp", "label": "Web Application", "description": "Delivers the banking SPA" },
+        { "id": "api", "label": "API Application", "description": "Provides banking via JSON/HTTPS" }
+      ]
+    },
+    { "id": "email", "label": "Email System", "description": "Sends emails to customers" },
+    { "id": "mainframe", "label": "Mainframe", "description": "Stores core banking data" }
+  ],
+  "relationships": [
+    { "from": "user", "to": "webapp", "label": "Visits" },
+    { "from": "webapp", "to": "api", "label": "Makes API calls" },
+    { "from": "api", "to": "mainframe", "label": "Reads/writes" },
+    { "from": "api", "to": "email", "label": "Sends emails using" }
+  ]
+}`;
+
+const BLOCK_TEMPLATE = `{
+  "type": "block",
+  "direction": "TB",
+  "blocks": [
+    {
+      "id": "platform", "label": "Platform Layer",
+      "children": [
+        { "id": "auth", "label": "Auth" },
+        { "id": "billing", "label": "Billing" },
+        { "id": "notifications", "label": "Notifications" }
+      ]
+    },
+    {
+      "id": "infra", "label": "Infrastructure",
+      "children": [
+        { "id": "k8s", "label": "Kubernetes" },
+        { "id": "monitoring", "label": "Monitoring" }
+      ]
+    }
+  ],
+  "connections": [
+    { "from": "auth", "to": "billing", "label": "validates" },
+    { "from": "billing", "to": "notifications", "label": "triggers" },
+    { "from": "k8s", "to": "monitoring", "label": "exports metrics" }
+  ]
+}`;
+
+const REQUIREMENT_TEMPLATE = `{
+  "type": "requirement",
+  "direction": "TB",
+  "requirements": [
+    { "id": "r1", "label": "User Authentication", "kind": "functional", "risk": "high", "status": "approved" },
+    { "id": "r2", "label": "Password Hashing", "kind": "security", "risk": "critical", "status": "approved" },
+    { "id": "r3", "label": "Session Management", "kind": "functional", "risk": "medium", "status": "in-progress" },
+    { "id": "r4", "label": "Login UI", "kind": "interface", "risk": "low", "status": "proposed" }
+  ],
+  "relationships": [
+    { "from": "r1", "to": "r2", "type": "derives" },
+    { "from": "r1", "to": "r3", "type": "derives" },
+    { "from": "r3", "to": "r4", "type": "refines" }
+  ]
+}`;
+
+const TIMELINE_TEMPLATE = `{
+  "type": "timeline",
+  "events": [
+    { "id": "e1", "date": "Q1 2024", "label": "Research", "description": "Market analysis", "variant": "primary" },
+    { "id": "e2", "date": "Q2 2024", "label": "Prototype", "description": "MVP development" },
+    { "id": "e3", "date": "Q3 2024", "label": "Beta", "description": "Closed beta launch", "variant": "warning" },
+    { "id": "e4", "date": "Q4 2024", "label": "Launch", "description": "Public release", "variant": "success" }
+  ]
+}`;
+
+const MINDMAP_TEMPLATE = `{
+  "type": "mindmap",
+  "root": {
+    "id": "root", "label": "Product Strategy",
+    "children": [
+      {
+        "id": "growth", "label": "Growth",
+        "children": [
+          { "id": "seo", "label": "SEO" },
+          { "id": "content", "label": "Content Marketing" },
+          { "id": "referrals", "label": "Referral Program" }
+        ]
+      },
+      {
+        "id": "product", "label": "Product",
+        "children": [
+          { "id": "features", "label": "Feature Roadmap" },
+          { "id": "ux", "label": "UX Improvements" }
+        ]
+      },
+      {
+        "id": "eng", "label": "Engineering",
+        "children": [
+          { "id": "perf", "label": "Performance" },
+          { "id": "infra", "label": "Infrastructure" }
+        ]
+      }
+    ]
+  }
+}`;
+
+const GITGRAPH_TEMPLATE = `{
+  "type": "gitgraph",
+  "commits": [
+    { "id": "a1b2c3d", "message": "Initial commit", "branch": "main" },
+    { "id": "e4f5g6h", "message": "Add auth module", "branch": "main", "parent": "a1b2c3d" },
+    { "id": "i7j8k9l", "message": "Feature: OAuth", "branch": "feature/oauth", "parent": "e4f5g6h" },
+    { "id": "m0n1o2p", "message": "Fix login bug", "branch": "main", "parent": "e4f5g6h" },
+    { "id": "q3r4s5t", "message": "Merge OAuth", "branch": "main", "parent": "m0n1o2p", "parents": ["i7j8k9l"], "merge": true }
+  ]
+}`;
+
+const GANTT_TEMPLATE = `{
+  "type": "gantt",
+  "sections": [
+    {
+      "label": "Design",
+      "tasks": [
+        { "id": "t1", "label": "Wireframes", "start": "Jan 1", "end": "Jan 15" },
+        { "id": "t2", "label": "UI Mockups", "start": "Jan 10", "end": "Jan 25" }
+      ]
+    },
+    {
+      "label": "Development",
+      "tasks": [
+        { "id": "t3", "label": "Frontend", "start": "Jan 20", "end": "Mar 1" },
+        { "id": "t4", "label": "Backend", "start": "Jan 25", "end": "Mar 10" },
+        { "id": "t5", "label": "Integration", "start": "Mar 1", "end": "Mar 20" }
+      ]
+    },
+    {
+      "label": "Launch",
+      "tasks": [
+        { "id": "t6", "label": "QA Testing", "start": "Mar 15", "end": "Apr 1" },
+        { "id": "t7", "label": "Release", "start": "Apr 1", "end": "Apr 5" }
+      ]
+    }
+  ]
+}`;
+
+const SANKEY_TEMPLATE = `{
+  "type": "sankey",
+  "nodes": [
+    { "id": "budget", "label": "Budget ($100k)" },
+    { "id": "eng", "label": "Engineering" },
+    { "id": "marketing", "label": "Marketing" },
+    { "id": "ops", "label": "Operations" },
+    { "id": "salaries", "label": "Salaries" },
+    { "id": "tools", "label": "Tools" },
+    { "id": "ads", "label": "Ads" }
+  ],
+  "flows": [
+    { "from": "budget", "to": "eng", "value": 50 },
+    { "from": "budget", "to": "marketing", "value": 30 },
+    { "from": "budget", "to": "ops", "value": 20 },
+    { "from": "eng", "to": "salaries", "value": 40 },
+    { "from": "eng", "to": "tools", "value": 10 },
+    { "from": "marketing", "to": "ads", "value": 25 }
+  ]
+}`;
+
+const KANBAN_TEMPLATE = `{
+  "type": "kanban",
+  "columns": [
+    {
+      "id": "backlog", "label": "Backlog",
+      "cards": [
+        { "id": "k1", "label": "Dark mode support" },
+        { "id": "k2", "label": "Export to PDF" }
+      ]
+    },
+    {
+      "id": "progress", "label": "In Progress",
+      "cards": [
+        { "id": "k3", "label": "Auth integration" },
+        { "id": "k4", "label": "Dashboard redesign" }
+      ]
+    },
+    {
+      "id": "review", "label": "Review",
+      "cards": [
+        { "id": "k5", "label": "API rate limiting" }
+      ]
+    },
+    {
+      "id": "done", "label": "Done",
+      "cards": [
+        { "id": "k6", "label": "User onboarding flow" }
+      ]
+    }
+  ]
+}`;
+
+const PIE_TEMPLATE = `{
+  "type": "pie",
+  "title": "Tech Stack Usage",
+  "segments": [
+    { "label": "TypeScript", "value": 45 },
+    { "label": "Python", "value": 25 },
+    { "label": "Go", "value": 15 },
+    { "label": "Rust", "value": 10 },
+    { "label": "Other", "value": 5 }
+  ]
+}`;
+
+const QUADRANT_TEMPLATE = `{
+  "type": "quadrant",
+  "title": "Feature Prioritization",
+  "items": [
+    { "id": "q1", "label": "Auth v2" },
+    { "id": "q2", "label": "Dark Mode" },
+    { "id": "q3", "label": "Export PDF" },
+    { "id": "q4", "label": "Mobile App" },
+    { "id": "q5", "label": "Analytics" },
+    { "id": "q6", "label": "Webhooks" }
+  ]
+}`;
+
+const PACKET_TEMPLATE = `{
+  "type": "packet",
+  "title": "TCP Header",
+  "rows": [
+    {
+      "fields": [
+        { "label": "Source Port", "bits": 16 },
+        { "label": "Destination Port", "bits": 16 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "Sequence Number", "bits": 32 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "Ack Number", "bits": 32 }
+      ]
+    },
+    {
+      "fields": [
+        { "label": "Offset", "bits": 4 },
+        { "label": "Reserved", "bits": 6 },
+        { "label": "Flags", "bits": 6 },
+        { "label": "Window Size", "bits": 16 }
+      ]
+    }
+  ]
+}`;
+
 const TEMPLATES = {
   flowchart: {
     label: "Flowchart",
@@ -149,9 +453,79 @@ const TEMPLATES = {
     code: ARCHITECTURE_TEMPLATE,
   },
   er: {
-    label: "ER",
-    description: "Entities, relationships, and schema communication",
+    label: "ER Diagram",
+    description: "Entities, relationships, and schema design",
     code: ER_TEMPLATE,
+  },
+  state: {
+    label: "State",
+    description: "State machines with transitions and guards",
+    code: STATE_TEMPLATE,
+  },
+  class: {
+    label: "Class",
+    description: "UML class diagrams with attributes and methods",
+    code: CLASS_TEMPLATE,
+  },
+  c4: {
+    label: "C4",
+    description: "C4 model with people, systems, and boundaries",
+    code: C4_TEMPLATE,
+  },
+  block: {
+    label: "Block",
+    description: "Block diagrams with nested groups",
+    code: BLOCK_TEMPLATE,
+  },
+  requirement: {
+    label: "Requirement",
+    description: "Requirements traceability and relationships",
+    code: REQUIREMENT_TEMPLATE,
+  },
+  timeline: {
+    label: "Timeline",
+    description: "Chronological events and milestones",
+    code: TIMELINE_TEMPLATE,
+  },
+  mindmap: {
+    label: "Mindmap",
+    description: "Hierarchical brainstorming and idea maps",
+    code: MINDMAP_TEMPLATE,
+  },
+  gitgraph: {
+    label: "Git Graph",
+    description: "Commits, branches, and merges",
+    code: GITGRAPH_TEMPLATE,
+  },
+  gantt: {
+    label: "Gantt",
+    description: "Project schedules with tasks and sections",
+    code: GANTT_TEMPLATE,
+  },
+  sankey: {
+    label: "Sankey",
+    description: "Flow quantities between nodes",
+    code: SANKEY_TEMPLATE,
+  },
+  kanban: {
+    label: "Kanban",
+    description: "Task boards with columns and cards",
+    code: KANBAN_TEMPLATE,
+  },
+  pie: {
+    label: "Pie Chart",
+    description: "Proportional data segments",
+    code: PIE_TEMPLATE,
+  },
+  quadrant: {
+    label: "Quadrant",
+    description: "2x2 prioritization and categorization",
+    code: QUADRANT_TEMPLATE,
+  },
+  packet: {
+    label: "Packet",
+    description: "Network protocol header bit layouts",
+    code: PACKET_TEMPLATE,
   },
 } as const;
 

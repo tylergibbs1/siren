@@ -3,6 +3,7 @@ export { Flowchart } from "./flowchart/flowchart";
 export { Step } from "./flowchart/step";
 export { Decision } from "./flowchart/decision";
 export { FlowEdge } from "./flowchart/edge";
+export { Stadium, Cylinder, Hexagon, Cloud, Document, Note, Subroutine, Trapezoid } from "./flowchart/shapes";
 
 // Sequence
 export { Sequence } from "./sequence/sequence";

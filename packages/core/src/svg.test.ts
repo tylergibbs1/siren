@@ -160,6 +160,100 @@ describe("renderToSVG", () => {
     expect(svg).toContain("Branch B");
   });
 
+  it("renders stadium (pill) shaped nodes", async () => {
+    const svg = await renderToSVG({
+      type: "flowchart",
+      nodes: [{ id: "a", label: "Terminal", shape: "stadium" }],
+      edges: [],
+    });
+
+    expect(svg).toContain("Terminal");
+    // Stadium uses rx equal to half the height for full pill shape
+    expect(svg).toContain("<rect");
+  });
+
+  it("renders cylinder shaped nodes", async () => {
+    const svg = await renderToSVG({
+      type: "flowchart",
+      nodes: [{ id: "db", label: "Database", shape: "cylinder" }],
+      edges: [],
+    });
+
+    expect(svg).toContain("Database");
+    expect(svg).toContain("<ellipse");
+    expect(svg).toContain("<path");
+  });
+
+  it("renders hexagon shaped nodes", async () => {
+    const svg = await renderToSVG({
+      type: "flowchart",
+      nodes: [{ id: "a", label: "Prepare", shape: "hexagon" }],
+      edges: [],
+    });
+
+    expect(svg).toContain("Prepare");
+    expect(svg).toContain("<polygon");
+  });
+
+  it("renders cloud shaped nodes", async () => {
+    const svg = await renderToSVG({
+      type: "flowchart",
+      nodes: [{ id: "a", label: "AWS", shape: "cloud" }],
+      edges: [],
+    });
+
+    expect(svg).toContain("AWS");
+    expect(svg).toContain("<path");
+  });
+
+  it("renders document shaped nodes", async () => {
+    const svg = await renderToSVG({
+      type: "flowchart",
+      nodes: [{ id: "a", label: "Report", shape: "document" }],
+      edges: [],
+    });
+
+    expect(svg).toContain("Report");
+    expect(svg).toContain("<path");
+  });
+
+  it("renders note shaped nodes with folded corner", async () => {
+    const svg = await renderToSVG({
+      type: "flowchart",
+      nodes: [{ id: "a", label: "Note", shape: "note" }],
+      edges: [],
+    });
+
+    expect(svg).toContain("Note");
+    // Note has two path elements (body + fold)
+    const paths = svg.match(/<path /g);
+    expect(paths!.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("renders subroutine shaped nodes", async () => {
+    const svg = await renderToSVG({
+      type: "flowchart",
+      nodes: [{ id: "a", label: "Process", shape: "subroutine" }],
+      edges: [],
+    });
+
+    expect(svg).toContain("Process");
+    // Subroutine has a rect + two inner vertical lines
+    const lines = svg.match(/<line /g);
+    expect(lines!.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("renders trapezoid shaped nodes", async () => {
+    const svg = await renderToSVG({
+      type: "flowchart",
+      nodes: [{ id: "a", label: "Manual", shape: "trapezoid" }],
+      edges: [],
+    });
+
+    expect(svg).toContain("Manual");
+    expect(svg).toContain("<polygon");
+  });
+
   it("throws for unknown diagram type", async () => {
     await expect(
       renderToSVG({ type: "nonexistent", nodes: [], edges: [] })

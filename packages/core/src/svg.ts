@@ -197,13 +197,20 @@ interface DiagramParts {
   direction: LayoutDirection;
 }
 
+// ── Valid node shapes ───────────────────────────────────────────────
+
+const VALID_SHAPES = new Set([
+  "rounded", "diamond", "circle", "doublecircle", "entity", "class", "person",
+  "stadium", "cylinder", "hexagon", "cloud", "document", "note", "subroutine", "trapezoid",
+]);
+
 // ── Schema → DiagramParts extraction ───────────────────────────────
 
 function extractFlowchart(schema: any): DiagramParts {
   const nodes: RenderedNode[] = (schema.nodes ?? []).map((n: any) => ({
     id: n.id,
     label: n.label ?? n.id,
-    shape: n.shape === "diamond" ? "diamond" : "rounded",
+    shape: VALID_SHAPES.has(n.shape) ? n.shape : "rounded",
     variant: n.variant ?? "default",
   }));
 
@@ -268,8 +275,8 @@ function extractArchitecture(schema: any): DiagramParts {
       nodes.push({
         id: svc.id,
         label: svc.label ?? svc.id,
-        shape: "rounded",
-        variant: "default",
+        shape: VALID_SHAPES.has(svc.shape) ? svc.shape : "rounded",
+        variant: svc.variant ?? "default",
       });
       childIds.push(svc.id);
     }
@@ -280,8 +287,8 @@ function extractArchitecture(schema: any): DiagramParts {
     nodes.push({
       id: svc.id,
       label: svc.label ?? svc.id,
-      shape: "rounded",
-      variant: "default",
+      shape: VALID_SHAPES.has(svc.shape) ? svc.shape : "rounded",
+      variant: svc.variant ?? "default",
     });
   }
 
@@ -632,12 +639,98 @@ function sizeNode(node: RenderedNode, fontSize: number, theme: SVGTheme): SizedN
     return { id: node.id, width, height };
   }
 
+  if (node.shape === "stadium") {
+    const lines = node.label.split("\n");
+    const maxLineW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize, font)));
+    const width = Math.max(120, maxLineW + pad.x + 20); // extra for pill ends
+    const height = Math.max(44, lines.length * (fontSize + 6) + pad.y);
+    return { id: node.id, width, height };
+  }
+
+  if (node.shape === "cylinder") {
+    const lines = node.label.split("\n");
+    const maxLineW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize, font)));
+    const width = Math.max(120, maxLineW + pad.x);
+    const height = Math.max(60, lines.length * (fontSize + 6) + pad.y + 24); // extra for top/bottom ellipses
+    return { id: node.id, width, height };
+  }
+
+  if (node.shape === "hexagon") {
+    const lines = node.label.split("\n");
+    const maxLineW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize, font)));
+    const width = Math.max(140, maxLineW + pad.x + 40); // extra for angled sides
+    const height = Math.max(50, lines.length * (fontSize + 6) + pad.y);
+    return { id: node.id, width, height };
+  }
+
+  if (node.shape === "cloud") {
+    const lines = node.label.split("\n");
+    const maxLineW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize, font)));
+    const width = Math.max(160, maxLineW + pad.x + 40);
+    const height = Math.max(80, lines.length * (fontSize + 6) + pad.y + 30);
+    return { id: node.id, width, height };
+  }
+
+  if (node.shape === "document") {
+    const lines = node.label.split("\n");
+    const maxLineW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize, font)));
+    const width = Math.max(120, maxLineW + pad.x);
+    const height = Math.max(56, lines.length * (fontSize + 6) + pad.y + 16); // extra for wave bottom
+    return { id: node.id, width, height };
+  }
+
+  if (node.shape === "note") {
+    const lines = node.label.split("\n");
+    const maxLineW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize, font)));
+    const width = Math.max(120, maxLineW + pad.x);
+    const height = Math.max(48, lines.length * (fontSize + 6) + pad.y);
+    return { id: node.id, width, height };
+  }
+
+  if (node.shape === "subroutine") {
+    const lines = node.label.split("\n");
+    const maxLineW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize, font)));
+    const width = Math.max(140, maxLineW + pad.x + 24); // extra for double borders
+    const height = Math.max(48, lines.length * (fontSize + 6) + pad.y);
+    return { id: node.id, width, height };
+  }
+
+  if (node.shape === "trapezoid") {
+    const lines = node.label.split("\n");
+    const maxLineW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize, font)));
+    const width = Math.max(140, maxLineW + pad.x + 30); // extra for angled sides
+    const height = Math.max(48, lines.length * (fontSize + 6) + pad.y);
+    return { id: node.id, width, height };
+  }
+
   // Default: rounded rectangle
   const lines = node.label.split("\n");
   const maxLineW = Math.max(...lines.map((l) => estimateTextWidth(l, fontSize, font)));
   const width = Math.max(120, maxLineW + pad.x);
   const height = Math.max(44, lines.length * (fontSize + 6) + pad.y);
   return { id: node.id, width, height };
+}
+
+// ── Centered text helper ────────────────────────────────────────────
+
+function pushCenteredText(
+  parts: string[],
+  label: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  fontSize: number,
+  fill: string,
+): void {
+  const lines = label.split("\n");
+  const lineH = fontSize + 6;
+  const startY = y + h / 2 - ((lines.length - 1) * lineH) / 2;
+  for (let i = 0; i < lines.length; i++) {
+    parts.push(
+      `<text x="${x + w / 2}" y="${startY + i * lineH + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-weight="400" fill="${fill}">${esc(lines[i]!)}</text>`
+    );
+  }
 }
 
 // ── SVG shape rendering ────────────────────────────────────────────
@@ -746,18 +839,130 @@ function renderNodeSVG(
     return parts.join("\n");
   }
 
+  // ── Stadium (pill) ──────────────────────────────────────────────
+  if (node.shape === "stadium") {
+    const ry = h / 2;
+    parts.push(
+      `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${ry}" fill="${colors.bg}" stroke="${colors.border}" stroke-width="1.5"/>`
+    );
+    pushCenteredText(parts, node.label, x, y, w, h, fontSize, colors.text);
+    return parts.join("\n");
+  }
+
+  // ── Cylinder (database) ───────────────────────────────────────
+  if (node.shape === "cylinder") {
+    const ry = 12; // ellipse vertical radius for top/bottom caps
+    parts.push(
+      `<path d="M ${x},${y + ry} A ${w / 2},${ry} 0 0,1 ${x + w},${y + ry} V ${y + h - ry} A ${w / 2},${ry} 0 0,1 ${x},${y + h - ry} Z" fill="${colors.bg}" stroke="${colors.border}" stroke-width="1.5"/>`
+    );
+    // Top ellipse (drawn on top)
+    parts.push(
+      `<ellipse cx="${x + w / 2}" cy="${y + ry}" rx="${w / 2}" ry="${ry}" fill="${colors.bg}" stroke="${colors.border}" stroke-width="1.5"/>`
+    );
+    // Text centered in the body (below top ellipse)
+    pushCenteredText(parts, node.label, x, y + ry, w, h - ry * 2, fontSize, colors.text);
+    return parts.join("\n");
+  }
+
+  // ── Hexagon ───────────────────────────────────────────────────
+  if (node.shape === "hexagon") {
+    const dx = 20; // horizontal inset for angled sides
+    const points = [
+      `${x + dx},${y}`,
+      `${x + w - dx},${y}`,
+      `${x + w},${y + h / 2}`,
+      `${x + w - dx},${y + h}`,
+      `${x + dx},${y + h}`,
+      `${x},${y + h / 2}`,
+    ].join(" ");
+    parts.push(
+      `<polygon points="${points}" fill="${colors.bg}" stroke="${colors.border}" stroke-width="1.5"/>`
+    );
+    pushCenteredText(parts, node.label, x, y, w, h, fontSize, colors.text);
+    return parts.join("\n");
+  }
+
+  // ── Cloud ─────────────────────────────────────────────────────
+  if (node.shape === "cloud") {
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+    // Cloud shape using cubic bezier bumps
+    const l = x + w * 0.08;
+    const ri = x + w * 0.92;
+    const t = y + h * 0.15;
+    const b = y + h * 0.85;
+    parts.push(
+      `<path d="M ${l + w * 0.15},${b} C ${x - w * 0.05},${b} ${x - w * 0.05},${cy - h * 0.05} ${l},${cy - h * 0.05} C ${x - w * 0.02},${t - h * 0.1} ${cx - w * 0.15},${y - h * 0.05} ${cx},${t} C ${cx + w * 0.2},${y - h * 0.05} ${ri + w * 0.05},${t - h * 0.05} ${ri},${cy - h * 0.02} C ${x + w * 1.05},${cy + h * 0.05} ${x + w * 1.02},${b + h * 0.05} ${ri - w * 0.1},${b} Z" fill="${colors.bg}" stroke="${colors.border}" stroke-width="1.5"/>`
+    );
+    pushCenteredText(parts, node.label, x, y, w, h, fontSize, colors.text);
+    return parts.join("\n");
+  }
+
+  // ── Document (wavy bottom) ────────────────────────────────────
+  if (node.shape === "document") {
+    const waveH = 10;
+    const bodyH = h - waveH;
+    parts.push(
+      `<path d="M ${x},${y + r} Q ${x},${y} ${x + r},${y} L ${x + w - r},${y} Q ${x + w},${y} ${x + w},${y + r} L ${x + w},${y + bodyH} C ${x + w * 0.7},${y + bodyH + waveH * 2} ${x + w * 0.3},${y + bodyH - waveH} ${x},${y + bodyH + waveH * 0.5} Z" fill="${colors.bg}" stroke="${colors.border}" stroke-width="1.5"/>`
+    );
+    // Text centered in the flat portion
+    pushCenteredText(parts, node.label, x, y, w, bodyH, fontSize, colors.text);
+    return parts.join("\n");
+  }
+
+  // ── Note (folded corner) ──────────────────────────────────────
+  if (node.shape === "note") {
+    const fold = 14;
+    parts.push(
+      `<path d="M ${x},${y} L ${x + w - fold},${y} L ${x + w},${y + fold} L ${x + w},${y + h} L ${x},${y + h} Z" fill="${colors.bg}" stroke="${colors.border}" stroke-width="1.5"/>`
+    );
+    // Fold triangle
+    parts.push(
+      `<path d="M ${x + w - fold},${y} L ${x + w - fold},${y + fold} L ${x + w},${y + fold}" fill="${theme.colors.surface}" stroke="${colors.border}" stroke-width="1"/>`
+    );
+    pushCenteredText(parts, node.label, x, y, w, h, fontSize, colors.text);
+    return parts.join("\n");
+  }
+
+  // ── Subroutine (double-bordered rectangle) ────────────────────
+  if (node.shape === "subroutine") {
+    const inset = 8;
+    parts.push(
+      `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${colors.bg}" stroke="${colors.border}" stroke-width="1.5"/>`
+    );
+    // Left inner border
+    parts.push(
+      `<line x1="${x + inset}" y1="${y}" x2="${x + inset}" y2="${y + h}" stroke="${colors.border}" stroke-width="1"/>`
+    );
+    // Right inner border
+    parts.push(
+      `<line x1="${x + w - inset}" y1="${y}" x2="${x + w - inset}" y2="${y + h}" stroke="${colors.border}" stroke-width="1"/>`
+    );
+    pushCenteredText(parts, node.label, x, y, w, h, fontSize, colors.text);
+    return parts.join("\n");
+  }
+
+  // ── Trapezoid ─────────────────────────────────────────────────
+  if (node.shape === "trapezoid") {
+    const dx = 18; // top inset
+    const points = [
+      `${x + dx},${y}`,
+      `${x + w - dx},${y}`,
+      `${x + w},${y + h}`,
+      `${x},${y + h}`,
+    ].join(" ");
+    parts.push(
+      `<polygon points="${points}" fill="${colors.bg}" stroke="${colors.border}" stroke-width="1.5"/>`
+    );
+    pushCenteredText(parts, node.label, x, y, w, h, fontSize, colors.text);
+    return parts.join("\n");
+  }
+
   // Default: rounded rectangle
   parts.push(
     `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${colors.bg}" stroke="${colors.border}" stroke-width="1.5"/>`
   );
-  const lines = node.label.split("\n");
-  const lineH = fontSize + 6;
-  const textStartY = y + h / 2 - ((lines.length - 1) * lineH) / 2;
-  for (let i = 0; i < lines.length; i++) {
-    parts.push(
-      `<text x="${x + w / 2}" y="${textStartY + i * lineH + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-weight="400" fill="${colors.text}">${esc(lines[i]!)}</text>`
-    );
-  }
+  pushCenteredText(parts, node.label, x, y, w, h, fontSize, colors.text);
   return parts.join("\n");
 }
 
