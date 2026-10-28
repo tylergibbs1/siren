@@ -1,22 +1,10 @@
 # Siren
 
-JSON-to-diagram renderer. Define diagrams as structured JSON, get SVG or interactive React components. No DSL to learn — just JSON.
+JSON-to-diagram renderer. Define diagrams as structured JSON, get SVG or interactive React components. No DSL to learn, just JSON.
 
-## Packages
+## Quick start
 
-| Package | Description |
-|---------|-------------|
-| `@siren/core` | Headless SVG renderer + ELK layout engine. Zero dependencies on React or DOM. |
-| `@siren/react` | React Flow-based interactive diagram component with auto-layout. |
-| `@siren/presets` | Ready-to-use React components for all 18 diagram types. |
-| `@siren/themes` | Theme definitions and color derivation utilities. |
-| `@siren/schema` | Zod schemas for validating Siren JSON documents. |
-
-## Diagram Types
-
-Flowchart, Sequence, ER, Architecture, State, Class, C4, Block, Requirement, Timeline, Mindmap, Git Graph, Gantt, Sankey, Kanban, Pie, Quadrant, Packet.
-
-## Quick Start
+The packages live in this monorepo. Clone it and run `bun install`, then:
 
 ### Headless SVG (Node.js / Bun / Deno)
 
@@ -52,7 +40,31 @@ function MyDiagram() {
 }
 ```
 
-## Node Shapes
+## Features
+
+- **Auto-layout** via ELK.js (layered, mrtree, force, box algorithms)
+- **Theming** with 5 built-in themes (dark, light, GitHub, presentation, neutral)
+- **Interactive mode** with drag, zoom, pan, collision detection
+- **MiniMap** for navigating large diagrams
+- **Export** to SVG, PNG, and JSON
+- **Accessible** with ARIA attributes on all diagram types
+- **Headless SVG** rendering, no browser or DOM required
+
+## Diagram types
+
+18 types: Flowchart, Sequence, ER, Architecture, State, Class, C4, Block, Requirement, Timeline, Mindmap, Git Graph, Gantt, Sankey, Kanban, Pie, Quadrant, Packet.
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| `@siren/core` | Headless SVG renderer + ELK layout engine. Zero dependencies on React or DOM. |
+| `@siren/react` | React Flow-based interactive diagram component with auto-layout. |
+| `@siren/presets` | Ready-to-use React components for all 18 diagram types. |
+| `@siren/themes` | Theme definitions and color derivation utilities. |
+| `@siren/schema` | Zod schemas for validating Siren JSON documents. |
+
+## Node shapes
 
 10 built-in shapes for flowcharts and architecture diagrams:
 
@@ -69,26 +81,18 @@ function MyDiagram() {
 | `subroutine` | Double-bordered rectangle | Sub-processes |
 | `trapezoid` | Narrow top, wide bottom | Manual operations |
 
-## Features
-
-- **Auto-layout** via ELK.js (layered, mrtree, force, box algorithms)
-- **Theming** with 5 built-in themes (dark, light, GitHub, presentation, neutral)
-- **Interactive mode** with drag, zoom, pan, collision detection
-- **MiniMap** for navigating large diagrams
-- **Export** to SVG, PNG, and JSON
-- **Accessible** with ARIA attributes on all diagram types
-- **Headless SVG** rendering — no browser or DOM required
-
 ## Development
 
 ```bash
 bun install
-bun run dev      # Start dev server
+bun run dev      # Start dev server (includes the docs + playground in apps/web)
 bun run build    # Build all packages
 bun run test     # Run tests
+bun run lint
+bun run type-check
 ```
 
-## Architecture
+### Repo layout
 
 ```
 siren/
